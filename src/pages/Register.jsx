@@ -46,42 +46,39 @@ export default function Register() {
 
   return (
     <div className="App">
-      <p className='title'>Лото</p>
-      <div className="auth-card">
-        <h2>Регистрация</h2>
-        <form onSubmit={onSubmit} className='auth-form'>
-          <div className='inputs'>
-            <input
-              type="text"
-              placeholder="Имя"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Пароль"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          {error ? <p className='auth-error'>{error}</p> : null}
-          <div className='buttons'>
-            <button className='b1' type="submit" disabled={loading}><p>{loading ? '...' : 'Зарегистрироваться'}</p></button>
-            <button className='b2' type='button' onClick={() => navigate('/login')}><p>У меня есть аккаунт</p></button>
-          </div>
-        </form>
-        <div className='auth-links'>
-          <button className='link-btn' type='button' onClick={() => navigate('/')}>← Назад</button>
+      <p className='title'>Регистрация</p>
+      <form onSubmit={onSubmit} className='auth-form'>
+        <div className='inputs'>
+          <input
+            type="text"
+            placeholder="Имя"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Пароль"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </div>
+        {error ? <p className='auth-error'>{error}</p> : null}
+        <div className='buttons'>
+          <button className='b1' type="submit" disabled={loading}><p>{loading ? '...' : 'Зарегистрироваться'}</p></button>
+          <button className='b2' type='button' onClick={() => navigate('/login')}><p>У меня есть аккаунт</p></button>
+        </div>
+      </form>
+      <div className='auth-links'>
+        <button className='link-btn' type='button' onClick={() => navigate('/')}>← Назад</button>
       </div>
     </div>
   );

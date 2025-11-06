@@ -13,10 +13,17 @@
   font-weight: 700;
 }
 
+.center {
+  text-align: center;
+  padding-top: 20vh;
+}
+
 .buttons {
   display: flex;
   flex-direction: column;
   padding: 20px 80px;
+  max-width: 500px;
+  margin: 0 auto;
 }
 
 .buttons button {
@@ -26,7 +33,7 @@
 }
 
 .b1 {
-  background: linear-gradient(#fff454, #ffc30e);
+  background: #fff;
 }
 
 .b2 {
@@ -48,16 +55,22 @@
   text-align: center;
 }
 
+.auth-form {
+  margin-top: 32px;
+}
+
 .auth-form .inputs {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 16px;
   padding: 0 20px 10px 20px;
+  max-width: 484px;
+  margin: 0 auto;
 }
 
 .auth-form input {
-  padding: 12px 14px;
-  border-radius: 12px;
+  padding: 16px 14px;
+  border-radius: 20px;
   border: none;
   outline: none;
 }

@@ -29,35 +29,32 @@ export default function Login() {
 
   return (
     <div className="App">
-      <p className='title'>Лото</p>
-      <div className="auth-card">
-        <h2>Вход</h2>
-        <form onSubmit={onSubmit} className='auth-form'>
-          <div className='inputs'>
-            <input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-            <input
-              type="password"
-              placeholder="Пароль"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          {error ? <p className='auth-error'>{error}</p> : null}
-          <div className='buttons'>
-            <button className='b1' type="submit" disabled={loading}><p>{loading ? '...' : 'Войти'}</p></button>
-            <button className='b2' type='button' onClick={() => navigate('/register')}><p>Регистрация</p></button>
-          </div>
-        </form>
-        <div className='auth-links'>
-          <button className='link-btn' type='button' onClick={() => navigate('/')}>← Назад</button>
+      <p className='title center'>Вход</p>
+      <form onSubmit={onSubmit} className='auth-form'>
+        <div className='inputs'>
+          <input
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            type="password"
+            placeholder="Пароль"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
         </div>
+        {error ? <p className='auth-error'>{error}</p> : null}
+        <div className='buttons'>
+          <button className='b1' type="submit" disabled={loading}><p>{loading ? '...' : 'Войти'}</p></button>
+          <button className='b2' type='button' onClick={() => navigate('/register')}><p>Регистрация</p></button>
+        </div>
+      </form>
+      <div className='auth-links'>
+        <button className='link-btn' type='button' onClick={() => navigate('/')}>← Назад</button>
       </div>
     </div>
   );

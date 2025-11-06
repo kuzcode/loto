@@ -20,7 +20,7 @@ function Landing() {
 
   return (
     <div className="App">
-      <p className='title'>Лото</p>
+      <p className='title center'>Лото</p>
 
       <div className='buttons'>
         <button className='b1' onClick={() => navigate('/login')}><p>Вход</p></button>
