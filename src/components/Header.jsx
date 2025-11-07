@@ -29,8 +29,11 @@ export default function Header() {
       }
     }
     load();
+    const listener = () => load();
+    window.addEventListener('balance-changed', listener);
     return () => {
       cancelled = true;
+      window.removeEventListener('balance-changed', listener);
     };
   }, [user]);
 

@@ -9,6 +9,8 @@ import ProtectedLayout from './layouts/ProtectedLayout';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Deposit from './pages/Deposit';
+import Game from './pages/Game';
+import LocalGame from './pages/LocalGame';
 
 function Landing() {
   const navigate = useNavigate();
@@ -41,6 +43,8 @@ function App() {
           <Route element={<ProtectedRoute />}> 
             <Route element={<ProtectedLayout /> }>
               <Route path='/app' element={<ProtectedApp />} />
+              <Route path='/play' element={<LocalGame />} />
+              <Route path='/game/:id' element={<Game />} />
               <Route path='/chat' element={<Chat />} />
               <Route path='/profile' element={<Profile />} />
             </Route>
