@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { databases, appwriteIds } from '../appwrite';
 import { useAuth } from '../auth/AuthProvider';
