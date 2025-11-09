@@ -97,11 +97,7 @@ export function generateCard3x9(seed = null) {
 // Генерация времени следующего добавления бота (в секундах)
 function getNextBotJoinTime(currentPlayers, gameStarted) {
   if (gameStarted) {
-    // После начала игры боты добавляются реже
-    if (currentPlayers >= 70) return null; // Максимум 70 игроков
-    // Обычно 30-50 игроков, изредка до 70
-    if (currentPlayers >= 50 && Math.random() > 0.3) return null; // 70% шанс не добавлять после 50
-    return 2 + Math.random() * 4; // 2-6 секунд
+    return null;
   } else {
     // До начала игры: 0-20 игроков за 30-60 секунд
     if (currentPlayers >= 20) {
@@ -148,6 +144,7 @@ export function initializeGames() {
     draw: null, // массив выпавших чисел
     drawIndex: 0, // текущий индекс в draw
     winners: [], // победители
+    jackpot: Math.floor(Math.random() * (300 - 50 + 1)) + 50, // Джекпот от 50 до 300
     nextBotJoin: Date.now() + (Math.random() * 2000 + 500), // когда следующий бот присоединится (мс)
     lastUpdate: Date.now(),
   }));
@@ -185,6 +182,11 @@ export function updateGamesState(games, partialUpdate = false) {
   const updatedGames = games.map(game => {
     const updated = { ...game };
     
+    // Убедиться, что у игры есть джекпот (для старых сохранений)
+    if (!updated.jackpot || updated.jackpot === undefined) {
+      updated.jackpot = Math.floor(Math.random() * (300 - 50 + 1)) + 50;
+    }
+    
     // Если игра закончилась, сбросить её через 5 секунд после завершения
     if (game.status === 'finished') {
       const finishedAt = game.finishedAt || now;
@@ -209,6 +211,7 @@ export function updateGamesState(games, partialUpdate = false) {
         winners: [],
         prizePerWinner: 0,
         finishedAt: null,
+        jackpot: Math.floor(Math.random() * (300 - 50 + 1)) + 50, // Новый джекпот
         nextBotJoin: now + (Math.random() * 2000 + 500),
       };
       }
@@ -659,5 +662,93 @@ function hashString(str) {
     hash = hash & hash; // Convert to 32bit integer
   }
   return Math.abs(hash);
+}
+
+// Управление участием пользователя в играх (localStorage)
+const PLAYER_GAMES_KEY = 'loto_player_games';
+
+// Сохранить участие пользователя в игре
+export function savePlayerGame(userId, gameId, cards) {
+  try {
+    const playerGames = JSON.parse(localStorage.getItem(PLAYER_GAMES_KEY) || '{}');
+    if (!playerGames[userId]) {
+      playerGames[userId] = {};
+    }
+    playerGames[userId][gameId] = {
+      gameId,
+      cards,
+      joinedAt: Date.now(),
+      prizeCredited: false, // Флаг, начислен ли выигрыш
+      jackpotWon: false, // Флаг, выиграл ли джекпот
+    };
+    localStorage.setItem(PLAYER_GAMES_KEY, JSON.stringify(playerGames));
+  } catch (e) {
+    console.error('Failed to save player game', e);
+  }
+}
+
+// Получить все игры пользователя
+export function getPlayerGames(userId) {
+  try {
+    const playerGames = JSON.parse(localStorage.getItem(PLAYER_GAMES_KEY) || '{}');
+    return playerGames[userId] || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+// Получить конкретную игру пользователя
+export function getPlayerGame(userId, gameId) {
+  try {
+    const playerGames = JSON.parse(localStorage.getItem(PLAYER_GAMES_KEY) || '{}');
+    return playerGames[userId]?.[gameId] || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+// Обновить информацию об игре пользователя
+export function updatePlayerGame(userId, gameId, updates) {
+  try {
+    const playerGames = JSON.parse(localStorage.getItem(PLAYER_GAMES_KEY) || '{}');
+    if (!playerGames[userId]) {
+      playerGames[userId] = {};
+    }
+    if (!playerGames[userId][gameId]) {
+      playerGames[userId][gameId] = {};
+    }
+    playerGames[userId][gameId] = {
+      ...playerGames[userId][gameId],
+      ...updates,
+    };
+    localStorage.setItem(PLAYER_GAMES_KEY, JSON.stringify(playerGames));
+  } catch (e) {
+    console.error('Failed to update player game', e);
+  }
+}
+
+// Удалить игру пользователя (после начисления выигрыша)
+export function removePlayerGame(userId, gameId) {
+  try {
+    const playerGames = JSON.parse(localStorage.getItem(PLAYER_GAMES_KEY) || '{}');
+    if (playerGames[userId] && playerGames[userId][gameId]) {
+      delete playerGames[userId][gameId];
+      localStorage.setItem(PLAYER_GAMES_KEY, JSON.stringify(playerGames));
+    }
+  } catch (e) {
+    console.error('Failed to remove player game', e);
+  }
+}
+
+// Получить активную игру пользователя (первая не завершенная)
+export function getActivePlayerGame(userId, games) {
+  const playerGames = getPlayerGames(userId);
+  for (const [gameId, playerGame] of Object.entries(playerGames)) {
+    const game = games.find(g => g.id === gameId);
+    if (game && game.status !== 'finished') {
+      return { game, playerGame };
+    }
+  }
+  return null;
 }
 

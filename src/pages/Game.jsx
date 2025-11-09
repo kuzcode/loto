@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { databases, appwriteIds } from '../appwrite';
 import { useAuth } from '../auth/AuthProvider';
@@ -10,7 +10,11 @@ import {
   finishGame,
   generateCard3x9,
   getCardsProgress,
+  savePlayerGame,
+  updatePlayerGame,
+  removePlayerGame,
 } from '../utils/gameManager';
+import barrelSound from '../бочонок.mp3';
 
 export default function Game() {
   const { id } = useParams();
@@ -26,11 +30,29 @@ export default function Game() {
   const [drawnNumbers, setDrawnNumbers] = useState([]);
   const [gameFinished, setGameFinished] = useState(false);
   const [isWinner, setIsWinner] = useState(false);
-  //const intervalRef = useRef(null);
+  const [jackpotWon, setJackpotWon] = useState(false);
+  const previousDrawnCountRef = useRef(0);
+  const audioRef = useRef(null);
+  const gameStatusRef = useRef(null);
+
+  // Детерминированная проверка джекпота на основе gameId и userId
+  function checkJackpotWin(gameId, userId) {
+    if (!gameId || !userId) return false;
+    // Используем хеш для детерминированного результата
+    const seed = `${gameId}_${userId}_jackpot`;
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) {
+      const char = seed.charCodeAt(i);
+      hash = ((hash << 5) - hash) + char;
+      hash = hash & hash;
+    }
+    // Вероятность 5% = значение от 0 до 19 (из 400 возможных)
+    return (Math.abs(hash) % 100) < 5;
+  }
 
   // Загрузка игр из localStorage
   useEffect(() => {
-    const { initializeGames, updateGamesState } = require('../utils/gameManager');
+    const { initializeGames, updateGamesState, getPlayerGame } = require('../utils/gameManager');
     let currentGames = initializeGames();
     currentGames = updateGamesState(currentGames, false);
     setGames(currentGames);
@@ -41,26 +63,56 @@ export default function Game() {
 
       // Проверить, участвует ли пользователь
       const player = currentGame.players?.find(p => p.userId === user?.$id);
+      const playerGame = user?.$id ? getPlayerGame(user.$id, id) : null;
+      const userParticipates = !!player || !!playerGame;
+      
+      // Если игра уже идет (counting или running) и пользователь не участвует, перенаправить на список игр
+      if ((currentGame.status === 'counting' || currentGame.status === 'running') && !userParticipates) {
+        navigate('/app', { replace: true });
+        return;
+      }
+      
       if (player && currentGame.status !== 'finished') {
         setIsInGame(true);
         setUserCards(player.cards || []);
         setGameFinished(false);
+      } else if (playerGame && currentGame.status !== 'finished') {
+        // Пользователь участвует, но игра еще не завершена
+        setIsInGame(true);
+        setUserCards(playerGame.cards || []);
+        setGameFinished(false);
       } else {
         setIsInGame(false);
         setGameFinished(false);
-        // Показать превью карточек
-        const previewCards = Array.from({ length: ticketCount }, () => generateCard3x9());
-        setUserCards(previewCards);
+        // Показать превью карточек только если игра в статусе waiting
+        if (currentGame.status === 'waiting') {
+          const previewCards = Array.from({ length: ticketCount }, () => generateCard3x9());
+          setUserCards(previewCards);
+        }
       }
 
       // Если игра завершена, показать результат
       if (currentGame.status === 'finished') {
         setGameFinished(true);
         const realWinners = (currentGame.winners || []).filter(w => !w.startsWith('bot_'));
-        setIsWinner(realWinners.includes(user?.$id));
+        const userWon = realWinners.includes(user?.$id);
+        setIsWinner(userWon);
+        
+        // Проверить джекпот
+        if (userWon && user?.$id) {
+          const wonJackpot = playerGame?.jackpotWon !== undefined 
+            ? playerGame.jackpotWon 
+            : checkJackpotWin(id, user.$id);
+          setJackpotWon(wonJackpot);
+          
+          // Сохранить результат джекпота если еще не сохранен
+          if (playerGame && playerGame.jackpotWon === undefined) {
+            updatePlayerGame(user.$id, id, { jackpotWon: wonJackpot });
+          }
+        }
       }
     }
-  }, [id, user, ticketCount]);
+  }, [id, user, ticketCount, navigate]);
 
   // Обновление состояния игры каждую секунду
   useEffect(() => {
@@ -72,6 +124,18 @@ export default function Game() {
         const currentGame = getGameById(updated, id);
 
         if (currentGame) {
+          // Проверить, участвует ли пользователь
+          const currentPlayer = currentGame.players?.find(p => p.userId === user?.$id);
+          const { getPlayerGame } = require('../utils/gameManager');
+          const currentPlayerGame = user?.$id ? getPlayerGame(user.$id, id) : null;
+          const userParticipates = !!currentPlayer || !!currentPlayerGame;
+          
+          // Если игра уже идет (counting или running) и пользователь не участвует, перенаправить
+          if ((currentGame.status === 'counting' || currentGame.status === 'running') && !userParticipates) {
+            navigate('/app', { replace: true });
+            return updated;
+          }
+          
           setGame(currentGame);
 
           // Обновить выпавшие числа
@@ -88,13 +152,29 @@ export default function Game() {
                 const finished = finishGame(updated, id, result.realWinners);
 
                 setGameFinished(true);
-                setIsWinner(result.realWinners.includes(user?.$id));
+                const userWon = result.realWinners.includes(user?.$id);
+                setIsWinner(userWon);
 
                 // Начислить выигрыш победителям
-                if (result.realWinners.length > 0 && result.realWinners.includes(user?.$id) && appwriteIds.usersCollectionId) {
+                if (result.realWinners.length > 0 && userWon && appwriteIds.usersCollectionId) {
                   const totalStake = currentGame.totalPlayers * currentGame.stake;
                   const winnerCount = result.realWinners.length;
                   const prize = (totalStake / winnerCount) * 0.9;
+                  
+                  // Розыгрыш джекпота с вероятностью 5% (детерминированно)
+                  const wonJackpot = checkJackpotWin(id, user.$id);
+                  const jackpotAmount = wonJackpot ? (currentGame.jackpot || 0) : 0;
+                  const totalPrize = prize + jackpotAmount;
+                  
+                  if (wonJackpot) {
+                    setJackpotWon(true);
+                    updatePlayerGame(user.$id, id, { jackpotWon: true });
+                  } else {
+                    updatePlayerGame(user.$id, id, { jackpotWon: false });
+                  }
+                  
+                  // Отметить, что выигрыш начислен
+                  updatePlayerGame(user.$id, id, { prizeCredited: true, prizeAmount: totalPrize });
 
                   databases.getDocument(appwriteIds.databaseId, appwriteIds.usersCollectionId, user.$id)
                     .then(userDoc => {
@@ -103,13 +183,22 @@ export default function Game() {
                         appwriteIds.databaseId,
                         appwriteIds.usersCollectionId,
                         user.$id,
-                        { balance: +(balance + prize).toFixed(2) }
+                        { balance: +(balance + totalPrize).toFixed(2) }
                       );
                     })
                     .then(() => {
                       window.dispatchEvent(new CustomEvent('balance-changed'));
+                      // Удалить игру из localStorage после начисления
+                      removePlayerGame(user.$id, id);
                     })
                     .catch(err => console.error('Failed to credit prize', err));
+                } else if (userWon) {
+                  // Пользователь выиграл, но выигрыш еще не начислен (будет начислен при следующей загрузке)
+                  updatePlayerGame(user.$id, id, { 
+                    prizeCredited: false,
+                    gameFinished: true,
+                    finishedAt: Date.now()
+                  });
                 }
 
                 return finished;
@@ -120,14 +209,65 @@ export default function Game() {
             if (currentGame.status === 'finished' && !gameFinished) {
               setGameFinished(true);
               const realWinners = (currentGame.winners || []).filter(w => !w.startsWith('bot_'));
-              setIsWinner(realWinners.includes(user?.$id));
+              const userWon = realWinners.includes(user?.$id);
+              setIsWinner(userWon);
+              
+              // Проверить, нужно ли начислить выигрыш (если пользователь вернулся на страницу)
+              if (userWon && user?.$id && appwriteIds.usersCollectionId) {
+                const { getPlayerGame } = require('../utils/gameManager');
+                const playerGame = getPlayerGame(user.$id, id);
+                if (playerGame && !playerGame.prizeCredited) {
+                  // Начислить выигрыш
+                  const totalStake = currentGame.totalPlayers * currentGame.stake;
+                  const winnerCount = realWinners.length;
+                  const prize = (totalStake / winnerCount) * 0.9;
+                  
+                  // Проверить, выиграл ли джекпот (детерминированно)
+                  const wonJackpot = playerGame.jackpotWon !== undefined 
+                    ? playerGame.jackpotWon 
+                    : checkJackpotWin(id, user.$id);
+                  const jackpotAmount = wonJackpot ? (currentGame.jackpot || 0) : 0;
+                  const totalPrize = prize + jackpotAmount;
+                  
+                  if (wonJackpot) {
+                    setJackpotWon(true);
+                    if (playerGame.jackpotWon === undefined) {
+                      updatePlayerGame(user.$id, id, { jackpotWon: true });
+                    }
+                  } else {
+                    if (playerGame.jackpotWon === undefined) {
+                      updatePlayerGame(user.$id, id, { jackpotWon: false });
+                    }
+                  }
+                  
+                  updatePlayerGame(user.$id, id, { prizeCredited: true, prizeAmount: totalPrize });
+
+                  databases.getDocument(appwriteIds.databaseId, appwriteIds.usersCollectionId, user.$id)
+                    .then(userDoc => {
+                      const balance = Number(userDoc.balance || 0);
+                      return databases.updateDocument(
+                        appwriteIds.databaseId,
+                        appwriteIds.usersCollectionId,
+                        user.$id,
+                        { balance: +(balance + totalPrize).toFixed(2) }
+                      );
+                    })
+                    .then(() => {
+                      window.dispatchEvent(new CustomEvent('balance-changed'));
+                      removePlayerGame(user.$id, id);
+                    })
+                    .catch(err => console.error('Failed to credit prize', err));
+                }
+              }
             }
           }
 
           // Обновить карточки пользователя если он в игре
-          const player = currentGame.players?.find(p => p.userId === user?.$id);
-          if (player) {
-            setUserCards(player.cards || []);
+          if (currentPlayer) {
+            setUserCards(currentPlayer.cards || []);
+            setIsInGame(true);
+          } else if (currentPlayerGame) {
+            setUserCards(currentPlayerGame.cards || []);
             setIsInGame(true);
           }
         }
@@ -137,13 +277,17 @@ export default function Game() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [games.length, id, user, gameFinished]);
+  }, [games.length, id, user, gameFinished, navigate, isInGame]);
 
   // Обновление превью карточек при изменении количества билетов
   useEffect(() => {
     if (!isInGame) {
-      const previewCards = Array.from({ length: ticketCount }, () => generateCard3x9());
-      setUserCards(previewCards);
+      // Регенерировать карточки только если количество не совпадает
+      // Это предотвращает пересоздание карточек при ручном удалении/обновлении
+      if (userCards.length !== ticketCount) {
+        const previewCards = Array.from({ length: ticketCount }, () => generateCard3x9());
+        setUserCards(previewCards);
+      }
     }
   }, [ticketCount, isInGame]);
 
@@ -157,15 +301,75 @@ export default function Game() {
     }
   }, [gameFinished, navigate]);
 
+  // Инициализация аудио
+  useEffect(() => {
+    audioRef.current = new Audio(barrelSound);
+    audioRef.current.volume = 0.5; // Установить громкость (0.0 - 1.0)
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  // Воспроизведение звука при выпадении нового числа
+  useEffect(() => {
+    if (!game) return;
+    
+    const currentStatus = game.status;
+    const prevStatus = gameStatusRef.current;
+    
+    // Если игра только что перешла в статус 'running', инициализировать счетчик
+    if (currentStatus === 'running' && prevStatus !== 'running') {
+      // Игра только что началась - установить счетчик на текущее количество чисел
+      // Это предотвратит воспроизведение звука для чисел, которые уже были выпавшими
+      previousDrawnCountRef.current = drawnNumbers.length;
+      gameStatusRef.current = currentStatus;
+      return;
+    }
+    
+    // Если игра не активна, сбросить счетчик
+    if (currentStatus !== 'running') {
+      if (prevStatus === 'running') {
+        // Игра только что закончилась - сбросить счетчик для следующей игры
+        previousDrawnCountRef.current = 0;
+      }
+      gameStatusRef.current = currentStatus;
+      return;
+    }
+    
+    // Игра активна ('running') - проверить, появилось ли новое число
+    if (currentStatus === 'running' && drawnNumbers.length > previousDrawnCountRef.current) {
+      // Новое число выпало - воспроизвести звук
+      if (audioRef.current) {
+        try {
+          // Сбросить время воспроизведения на начало для повторного воспроизведения
+          audioRef.current.currentTime = 0;
+          audioRef.current.play().catch(err => {
+            // Игнорировать ошибки автоплей (браузер может блокировать автоплей без взаимодействия пользователя)
+            console.log('Audio play error (ignored):', err);
+          });
+        } catch (err) {
+          console.log('Audio play error (ignored):', err);
+        }
+      }
+      previousDrawnCountRef.current = drawnNumbers.length;
+    }
+    
+    gameStatusRef.current = currentStatus;
+  }, [drawnNumbers, game]);
+
   async function buyTickets() {
     if (!game || !user?.$id || isInGame) return;
-    
+
     // Запретить покупку билетов во время игры или отсчета
     if (game.status === 'running' || game.status === 'counting') {
       setError('Нельзя покупать билеты во время игры');
       return;
     }
-    
+
     setLoading(true);
     setError('');
 
@@ -176,7 +380,9 @@ export default function Game() {
         user.$id
       );
       const balance = Number(userDoc.balance || 0);
-      const totalCost = game.stake * ticketCount;
+      // Использовать фактическое количество карточек (может отличаться от ticketCount при ручных изменениях)
+      const actualTicketCount = userCards.length;
+      const totalCost = game.stake * actualTicketCount;
 
       if (balance < totalCost) {
         throw new Error('Недостаточно средств');
@@ -191,11 +397,14 @@ export default function Game() {
       );
       window.dispatchEvent(new CustomEvent('balance-changed'));
 
-      // Генерировать карточки для пользователя
-      const cards = Array.from({ length: ticketCount }, () => generateCard3x9());
+      // Использовать текущие карточки пользователя (которые могли быть обновлены/удалены)
+      const cards = userCards;
 
       // Добавить игрока в игру
       const updatedGames = addPlayerToGame(games, id, user.$id, cards);
+
+      // Сохранить участие пользователя в localStorage
+      savePlayerGame(user.$id, id, cards);
 
       // Обновить состояние игр после добавления игрока
       const finalGames = updateGamesState(updatedGames, false);
@@ -218,15 +427,33 @@ export default function Game() {
     return drawnNumbers.includes(num);
   }
 
+  // Обновить конкретный билет (регенерировать случайно)
+  function updateTicket(cardIdx) {
+    if (isInGame) return; // Нельзя обновлять билеты после покупки
+    
+    const updatedCards = [...userCards];
+    updatedCards[cardIdx] = generateCard3x9();
+    setUserCards(updatedCards);
+  }
+
+  // Удалить билет
+  function deleteTicket(cardIdx) {
+    if (isInGame) return; // Нельзя удалять билеты после покупки
+    if (userCards.length <= 1) return; // Должен остаться хотя бы один билет
+    
+    const updatedCards = userCards.filter((_, idx) => idx !== cardIdx);
+    setUserCards(updatedCards);
+    setTicketCount(updatedCards.length);
+  }
+
   // Получить последние 5 выпавших чисел для отображения (самое новое слева)
   const last5Numbers = useMemo(() => {
     if (drawnNumbers.length === 0) return [null, null, null, null, null];
     const last5 = drawnNumbers.slice(-5);
-    // Дополнить до 5 элементов null'ами если чисел меньше 5
     while (last5.length < 5) {
       last5.unshift(null);
     }
-    // Перевернуть, чтобы самое новое было слева
+
     return last5.reverse();
   }, [drawnNumbers]);
 
@@ -277,7 +504,7 @@ export default function Game() {
         {game.status === 'running' && (
           <div className='number-windows' style={{
             display: 'flex',
-            gap: '10px',
+            gap: '8px',
             marginBottom: '20px',
             justifyContent: 'center',
             alignItems: 'center',
@@ -288,8 +515,8 @@ export default function Game() {
                 <div
                   key={idx}
                   style={{
-                    width: isLatest ? '80px' : '60px',
-                    height: isLatest ? '80px' : '60px',
+                    width: isLatest ? '70px' : '50px',
+                    height: isLatest ? '70px' : '50px',
                     borderRadius: '50%',
                     backgroundColor: num ? '#0565ff' : '#333',
                     color: '#fff',
@@ -368,22 +595,47 @@ export default function Game() {
 
         {/* Сообщение о завершении игры */}
         {gameFinished && (
-          <div style={{
-            backgroundColor: isWinner ? '#0565ff' : '#ff5733',
-            padding: '20px',
-            borderRadius: '12px',
-            marginBottom: '20px',
-            textAlign: 'center',
-          }}>
-            <p style={{ margin: 0, color: '#fff', fontSize: '18px', fontWeight: 'bold' }}>
-              {isWinner ? 'Поздравляем! Вы выиграли!' : 'Игра завершена'}
-            </p>
-            {isWinner && game.prizePerWinner > 0 && (
-              <p style={{ margin: '8px 0 0 0', color: '#fff', fontSize: '14px' }}>
-                Ваш выигрыш: {game.prizePerWinner.toFixed(2)}₼
+          <>
+            <div style={{
+              backgroundColor: isWinner ? '#0565ff' : '#ff5733',
+              padding: '20px',
+              borderRadius: '12px',
+              marginBottom: '20px',
+              textAlign: 'center',
+            }}>
+              <p style={{ margin: 0, color: '#fff', fontSize: '18px', fontWeight: 'bold' }}>
+                {isWinner ? 'Поздравляем! Вы выиграли!' : 'Игра завершена'}
               </p>
+              {isWinner && game.prizePerWinner > 0 && (
+                <p style={{ margin: '8px 0 0 0', color: '#fff', fontSize: '14px' }}>
+                  Ваш выигрыш: {game.prizePerWinner.toFixed(2)}₼
+                </p>
+              )}
+            </div>
+            
+            {/* Плашка с джекпотом */}
+            {isWinner && jackpotWon && game.jackpot > 0 && (
+              <div style={{
+                backgroundColor: '#ffd700',
+                padding: '25px',
+                borderRadius: '12px',
+                marginBottom: '20px',
+                textAlign: 'center',
+                border: '3px solid #ffed4e',
+                animation: 'pulse 2s infinite',
+              }}>
+                <p style={{ margin: 0, color: '#000', fontSize: '24px', fontWeight: 'bold', marginBottom: '10px' }}>
+                  🎉 ДЖЕКПОТ! 🎉
+                </p>
+                <p style={{ margin: 0, color: '#000', fontSize: '20px', fontWeight: 'bold' }}>
+                  Вы выиграли джекпот: {game.jackpot}₼
+                </p>
+                <p style={{ margin: '8px 0 0 0', color: '#333', fontSize: '14px' }}>
+                  Общий выигрыш: {(game.prizePerWinner + game.jackpot).toFixed(2)}₼
+                </p>
+              </div>
             )}
-          </div>
+          </>
         )}
 
         {/* Карточки */}
@@ -394,38 +646,100 @@ export default function Game() {
           marginBottom: '20px',
         }}>
           {userCards.map((card, cardIdx) => (
-            <div key={cardIdx} className='loto-card' style={{
-              backgroundColor: '#fff',
-              padding: '15px',
-              borderRadius: '12px',
+            <div key={cardIdx} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '10px',
             }}>
-              {card.map((row, rowIdx) => (
-                <div key={rowIdx} className='loto-row-9' style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(9, 1fr)',
-                  gap: '4px',
+              {/* Кнопки обновления и удаления (только до покупки билетов) */}
+              {!isInGame && game.status !== 'finished' && game.status !== 'running' && game.status !== 'counting' && (
+                <div style={{
+                  display: 'flex',
+                  gap: '10px',
+                  justifyContent: 'flex-end',
                 }}>
-                  {row.map((num, colIdx) => (
-                    <div
-                      key={colIdx}
-                      style={{
-                        padding: '8px',
-                        textAlign: 'center',
-                        backgroundColor: num && isMarked(num) ? '#0565ff' : num ? '#f0f0f0' : 'transparent',
-                        color: num && isMarked(num) ? '#fff' : '#000',
-                        borderRadius: '4px',
-                        minHeight: '40px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: num && isMarked(num) ? 'bold' : 'normal',
-                      }}
-                    >
-                      {num ?? ''}
-                    </div>
-                  ))}
+                  <button
+                    onClick={() => updateTicket(cardIdx)}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      backgroundColor: '#0565ff',
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseOver={(e) => e.target.style.backgroundColor = '#0452cc'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = '#0565ff'}
+                  >
+                    Обновить
+                  </button>
+                  <button
+                    onClick={() => deleteTicket(cardIdx)}
+                    disabled={userCards.length <= 1}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      backgroundColor: userCards.length <= 1 ? '#555' : '#ff5733',
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: 'bold',
+                      cursor: userCards.length <= 1 ? 'not-allowed' : 'pointer',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseOver={(e) => {
+                      if (userCards.length > 1) {
+                        e.target.style.backgroundColor = '#cc4526';
+                      }
+                    }}
+                    onMouseOut={(e) => {
+                      if (userCards.length > 1) {
+                        e.target.style.backgroundColor = '#ff5733';
+                      }
+                    }}
+                  >
+                    Удалить
+                  </button>
                 </div>
-              ))}
+              )}
+              <div className='loto-card' style={{
+                backgroundColor: '#fff',
+                padding: '15px',
+                borderRadius: '12px',
+              }}>
+                {card.map((row, rowIdx) => (
+                  <div key={rowIdx} className='loto-row-9' style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(9, 1fr)',
+                    gap: '4px',
+                  }}>
+                    {row.map((num, colIdx) => (
+                      <div
+                        key={colIdx}
+                        style={{
+                          padding: '6px',
+                          textAlign: 'center',
+                          backgroundColor: num && isMarked(num) ? '#0565ff' : num ? '#f0f0f0' : 'transparent',
+                          color: num && isMarked(num) ? '#fff' : '#000',
+                          borderRadius: '6px',
+                          minHeight: '40px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginBottom: '2px',
+                          marginTop: '2px',
+                          fontWeight: num && isMarked(num) ? 'bold' : 'normal',
+                        }}
+                      >
+                        {num ?? ''}
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -443,21 +757,21 @@ export default function Game() {
             boxSizing: 'border-box',
           }}>
             <div
-            className='blurred'
-            style={{
-              backgroundColor: '#2b2d3390',
-              padding: '20px',
-              borderRadius: '16px',
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '15px',
-            }}>
+              className='blurred'
+              style={{
+                backgroundColor: '#2b2d3390',
+                padding: '20px',
+                borderRadius: '16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '15px',
+              }}>
               {(game.status === 'running' || game.status === 'counting') && (
-                <p style={{ 
-                  margin: '0 0 10px 0', 
-                  color: '#ff5733', 
-                  fontSize: '14px', 
-                  textAlign: 'center' 
+                <p style={{
+                  margin: '0 0 10px 0',
+                  color: '#ff5733',
+                  fontSize: '14px',
+                  textAlign: 'center'
                 }}>
                   Покупка билетов недоступна во время игры
                 </p>
@@ -505,7 +819,7 @@ export default function Game() {
                 >
                   {loading ? '...' : `Купить билет${ticketCount > 1 ? 'ы' : ''}`}
                   <div style={{ fontSize: '14px', marginTop: '4px', opacity: 0.9 }}>
-                    {game.stake * ticketCount}₼
+                    {(game.stake * ticketCount).toFixed(2)}₼
                   </div>
                 </button>
                 <button
