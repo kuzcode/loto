@@ -9,7 +9,6 @@ import {
   checkWinners,
   finishGame,
   generateCard3x9,
-  getAllPlayerCards,
   getCardsProgress,
 } from '../utils/gameManager';
 
@@ -27,7 +26,7 @@ export default function Game() {
   const [drawnNumbers, setDrawnNumbers] = useState([]);
   const [gameFinished, setGameFinished] = useState(false);
   const [isWinner, setIsWinner] = useState(false);
-  const intervalRef = useRef(null);
+  //const intervalRef = useRef(null);
 
   // Загрузка игр из localStorage
   useEffect(() => {
