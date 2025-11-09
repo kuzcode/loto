@@ -138,7 +138,7 @@ export default function Game() {
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [games.length, id, user]);
+  }, [games.length, id, user, gameFinished]);
 
   // Обновление превью карточек при изменении количества билетов
   useEffect(() => {
@@ -240,7 +240,7 @@ export default function Game() {
     if (keys.length === 0) return {};
     const minRemaining = keys[0];
     return { [minRemaining]: progress[minRemaining] };
-  }, [game, game?.drawIndex, game?.status]);
+  }, [game]);
 
   if (!game) {
     return (

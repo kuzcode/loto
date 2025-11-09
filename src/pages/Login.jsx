@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { account } from '../appwrite';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 
 export default function Login() {

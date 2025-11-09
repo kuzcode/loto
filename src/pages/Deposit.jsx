@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { account, databases, appwriteIds, ID } from '../appwrite';
+import { databases, appwriteIds } from '../appwrite';
 import { useAuth } from '../auth/AuthProvider';
 
 export default function Deposit() {

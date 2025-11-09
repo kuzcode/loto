@@ -87,12 +87,12 @@ export function generateCard3x9(seed = null) {
 }
 
 // Генерация случайного числа от min до max (экспоненциальное распределение для более реалистичного добавления ботов)
-function randomExponential(min, max, lambda = 2) {
-  const u = Math.random();
-  const exp = -Math.log(u) / lambda;
-  const normalized = exp % (max - min + 1);
-  return Math.floor(min + normalized);
-}
+//function randomExponential(min, max, lambda = 2) {
+//   const u = Math.random();
+//   const exp = -Math.log(u) / lambda;
+//   const normalized = exp % (max - min + 1);
+//   return Math.floor(min + normalized);
+// }
 
 // Генерация времени следующего добавления бота (в секундах)
 function getNextBotJoinTime(currentPlayers, gameStarted) {

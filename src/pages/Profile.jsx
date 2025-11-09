@@ -17,7 +17,7 @@ export default function Profile() {
     <div>
       <div className='profile'>
         <div className='flex'>
-        <img src={userimg} className='avatar' />
+        <img src={userimg} className='avatar' alt='user' />
         <h2 className='name'>{user?.name || '-'}</h2>
         </div>
         <p className='email'>{user?.email || '-'}</p>
