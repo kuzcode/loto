@@ -6,3 +6,42 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.7);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 0 0 10px rgba(255, 215, 0, 0);
+  }
+}
+
+@keyframes winCelebration {
+  0% {
+    transform: scale(0.5) rotate(-10deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(10deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes winPulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(5, 101, 255, 0.8);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(5, 101, 255, 1);
+  }
+}
+
+.win-animation {
+  animation: winCelebration 0.8s ease-out, winPulse 2s ease-in-out infinite;
+}
