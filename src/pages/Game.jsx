@@ -289,7 +289,7 @@ export default function Game() {
         setUserCards(previewCards);
       }
     }
-  }, [ticketCount, isInGame]);
+  }, [ticketCount, isInGame, userCards.length]);
 
   // Редирект через 5 секунд после завершения игры
   useEffect(() => {
