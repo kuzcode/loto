@@ -65,7 +65,7 @@ export default function ProtectedLayout() {
               boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
             }}
           >
-            Вернуться к игре ({activeGame.stake}₼)
+            Вернуться к игре на {activeGame.stake}₼
           </button>
         </div>
       )}
