@@ -246,7 +246,7 @@ export default function Game() {
         setUserCards(previewCards);
       }
     }
-  }, [ticketCount, isInGame]);
+  }, [ticketCount, isInGame, userCards.length]);
 
   // Убрали автоматический редирект - пользователь сам решает, что делать после игры
 
