@@ -92,7 +92,7 @@ export default function Leaderboard() {
       {/* Шапка таблицы */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '2fr 0.8fr 0.8fr',
+        gridTemplateColumns: '2fr 1fr 1fr',
         gap: '10px',
         fontWeight: 'bold',
         color: '#fff',
@@ -121,7 +121,7 @@ export default function Leaderboard() {
                 padding: '15px 20px',
                 marginBottom: '10px',
                 display: 'grid',
-                gridTemplateColumns: '2fr 0.7fr 0.7fr',
+                gridTemplateColumns: '2fr 0.9fr 0.9fr',
                 gap: '10px',
                 alignItems: 'center',
                 border: isCurrentUser(userItem.id) ? '2px solid #fff' : 'none',
