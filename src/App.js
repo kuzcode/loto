@@ -10,6 +10,7 @@ import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Deposit from './pages/Deposit';
 import Game from './pages/Game';
+import Leaderboard from './pages/Leaderboard';
 
 function Landing() {
   const navigate = useNavigate();
@@ -44,6 +45,7 @@ function App() {
               <Route path='/app' element={<ProtectedApp />} />
               <Route path='/game/:id' element={<Game />} />
               <Route path='/chat' element={<Chat />} />
+              <Route path='/leaderboard' element={<Leaderboard />} />
               <Route path='/profile' element={<Profile />} />
             </Route>
             <Route path='/deposit' element={<Deposit />} />

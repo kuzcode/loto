@@ -74,21 +74,18 @@ export default function ProtectedApp() {
             }}
           >
             <div style={{ flex: 1 }}>
-              <h3 style={{ marginTop: 0 }}>Ставка: {game.stake}₼</h3>
+              <h3 style={{ marginTop: 0 }}>Ставка: <span className='stake'>{game.stake}₼</span></h3>
+              <p className='win'>
+                Выигрыш: {((game.totalPlayers * game.stake) * 0.9).toFixed(2)}₼
+              </p>
               <p style={{ margin: '8px 0', fontSize: '16px' }}>{getGameStatusText(game)}</p>
               {game.status === 'waiting' && game.totalPlayers < 20 && (
-                <p style={{ margin: '4px 0', fontSize: '14px', color: '#aaa' }}>
+                <p style={{ margin: '4px 0', fontSize: '14px', color: '#666' }}>
                   Ожидание игроков...
                 </p>
               )}
             </div>
-            <div style={{
-              marginLeft: '15px',
-              textAlign: 'right',
-              padding: '8px 12px',
-              backgroundColor: '#0565ff',
-              borderRadius: '8px',
-            }}>
+            <div className='jackpot'>
               <p style={{ margin: 0, fontSize: '12px', color: '#fff', opacity: 0.9 }}>
                 Джекпот
               </p>

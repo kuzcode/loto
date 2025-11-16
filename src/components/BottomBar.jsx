@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import chat from '../icons/chat.png'
 import user from '../icons/user.png'
 import game from '../icons/game.png'
+import people from '../icons/people.png'
 import { playClickSound } from '../utils/soundManager';
 
 export default function BottomBar() {
@@ -24,6 +25,13 @@ export default function BottomBar() {
         onClick={handleClick}
       >
         <img src={game} alt='home' />
+      </NavLink>
+      <NavLink 
+        to='/leaderboard' 
+        className={({ isActive }) => isActive ? 'bb-item active' : 'bb-item'}
+        onClick={handleClick}
+      >
+        <img src={people} alt='leaderboard' />
       </NavLink>
       <NavLink 
         to='/profile' 

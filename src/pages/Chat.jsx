@@ -26,6 +26,7 @@ export default function Chat() {
   const [cursorAfter, setCursorAfter] = useState(null);
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [deletingId, setDeletingId] = useState(null);
 
   const canQuery = useMemo(() => Boolean(appwriteIds.databaseId && appwriteIds.chatCollectionId), []);
 
@@ -130,25 +131,95 @@ export default function Chat() {
     }
   }
 
+  async function deleteMessage(messageId) {
+    if (!canQuery || !user?.$id || deletingId) return;
+    setDeletingId(messageId);
+    try {
+      await databases.deleteDocument(
+        appwriteIds.databaseId,
+        appwriteIds.chatCollectionId,
+        messageId
+      );
+      // Удалить сообщение из списка
+      setItems((prev) => prev.filter(item => item.$id !== messageId));
+    } catch (e) {
+      console.error('Failed to delete message:', e);
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className='App'>
       <p className='title'>Чат</p>
       <div className='chat'>
         <div className='chat-list'>
-          {items.map((d) => (
-            <div key={d.$id} className='chat-item'>
-              <div className='chat-author'>{d.author?.name || 'Аноним'}</div>
-              <div className='chat-message'>{d.message}</div>
-              <div className='chat-time'>{formatRelative(d.$createdAt)}</div>
-            </div>
-          ))}
+          {items.map((d) => {
+            const isOwnMessage = d.author?.id === user?.$id || d.author === user?.$id;
+            return (
+              <div key={d.$id} className='chat-item' style={{ position: 'relative' }}>
+                <div className='chat-author'>{d.author?.name || 'Аноним'}</div>
+                <div className='chat-message'>{d.message}</div>
+                <div className='chat-time'>{formatRelative(d.$createdAt)}</div>
+                {isOwnMessage && (
+                  <button
+                    onClick={() => deleteMessage(d.$id)}
+                    disabled={deletingId === d.$id}
+                    style={{
+                      position: 'absolute',
+                      right: '10px',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'transparent',
+                      border: 'none',
+                      color: '#ff5733',
+                      cursor: deletingId === d.$id ? 'not-allowed' : 'pointer',
+                      fontSize: '18px',
+                      padding: '5px',
+                      opacity: deletingId === d.$id ? 0.5 : 1,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '24px',
+                      height: '24px',
+                    }}
+                    title='Удалить сообщение'
+                  >
+                    {deletingId === d.$id ? '...' : '🗑️'}
+                  </button>
+                )}
+              </div>
+            );
+          })}
           {items.length === 0 && !loading ? (
             <p style={{ textAlign: 'center', color: '#fff' }}>Пока сообщений нет</p>
           ) : null}
+          {loading && items.length === 0 && (
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              padding: '40px',
+              minHeight: '200px'
+            }}>
+              <div className='spinner'></div>
+            </div>
+          )}
         </div>
         <div className='buttons'>
           {hasMore ? (
-            <button className='b2' onClick={() => loadMore(false)} disabled={loading}><p>{loading ? '...' : 'Показать ещё'}</p></button>
+            <button className='b2' onClick={() => loadMore(false)} disabled={loading}>
+              <p style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {loading ? (
+                  <>
+                    <div className='spinner-small'></div>
+                    Загрузка...
+                  </>
+                ) : (
+                  'Показать ещё'
+                )}
+              </p>
+            </button>
           ) : (
             <p className='chatp'>Это все сообщения</p>
           )}

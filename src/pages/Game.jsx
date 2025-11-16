@@ -345,6 +345,7 @@ export default function Game() {
         user.$id
       );
       const balance = Number(userDoc.balance || 0);
+      const played = Number(userDoc.played || 0);
       // Использовать фактическое количество карточек (может отличаться от ticketCount при ручных изменениях)
       const actualTicketCount = userCards.length;
       const totalCost = game.stake * actualTicketCount;
@@ -358,7 +359,8 @@ export default function Game() {
         appwriteIds.databaseId,
         appwriteIds.usersCollectionId,
         user.$id,
-        { balance: +(balance - totalCost).toFixed(2) }
+        { balance: +(balance - totalCost).toFixed(2),
+          played: played + 1 }
       );
       window.dispatchEvent(new CustomEvent('balance-changed'));
 
@@ -480,7 +482,7 @@ export default function Game() {
                     width: isLatest ? '70px' : '50px',
                     height: isLatest ? '70px' : '50px',
                     borderRadius: '50%',
-                    backgroundColor: num ? '#0565ff' : '#333',
+                    backgroundColor: num ? '#780e9590' : '#333',
                     color: '#fff',
                     display: 'flex',
                     alignItems: 'center',
@@ -528,7 +530,7 @@ export default function Game() {
         {/* Блок "Вы в игре" */}
         {isInGame && (
           <div style={{
-            backgroundColor: '#0565ff',
+            backgroundColor: '#780e9590',
             padding: '15px',
             borderRadius: '12px',
             marginBottom: '20px',
@@ -565,7 +567,7 @@ export default function Game() {
               left: '50%',
               transform: 'translate(-50%, -50%)',
               zIndex: 9999,
-              backgroundColor: '#0565ff',
+              backgroundColor: '#780e9590',
               padding: '40px 60px',
               borderRadius: '20px',
               textAlign: 'center',
@@ -584,7 +586,7 @@ export default function Game() {
         {/* Сообщение о завершении игры */}
         {gameFinished && (
           <div style={{
-            backgroundColor: isWinner ? '#0565ff' : '#ff5733',
+            backgroundColor: isWinner ? '#780e9590' : '#ff5733',
             padding: '20px',
             borderRadius: '12px',
             marginBottom: '20px',
@@ -607,7 +609,7 @@ export default function Game() {
                 marginTop: '15px',
                 padding: '12px 24px',
                 backgroundColor: '#fff',
-                color: isWinner ? '#0565ff' : '#ff5733',
+                color: isWinner ? '#780e9590' : '#ff5733',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '16px',
@@ -670,7 +672,7 @@ export default function Game() {
                       padding: '8px 16px',
                       borderRadius: '8px',
                       border: 'none',
-                      backgroundColor: '#0565ff',
+                      backgroundColor: '#780e9590',
                       color: '#fff',
                       fontSize: '14px',
                       fontWeight: 'bold',
@@ -678,7 +680,7 @@ export default function Game() {
                       transition: 'background-color 0.2s',
                     }}
                     onMouseOver={(e) => e.target.style.backgroundColor = '#0452cc'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#0565ff'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = '#780e9590'}
                   >
                     Обновить
                   </button>
@@ -728,7 +730,7 @@ export default function Game() {
                         style={{
                           padding: '6px',
                           textAlign: 'center',
-                          backgroundColor: num && isMarked(num) ? '#0565ff' : num ? '#f0f0f0' : 'transparent',
+                          backgroundColor: num && isMarked(num) ? '#780e9590' : num ? '#f0f0f0' : 'transparent',
                           color: num && isMarked(num) ? '#fff' : '#000',
                           borderRadius: '6px',
                           minHeight: '40px',
@@ -796,7 +798,7 @@ export default function Game() {
                     height: '40px',
                     borderRadius: '50%',
                     border: 'none',
-                    backgroundColor: (ticketCount <= 1 || game.status === 'running') ? '#555' : '#0565ff',
+                    backgroundColor: (ticketCount <= 1 || game.status === 'running') ? '#555' : '#780e9590',
                     color: '#fff',
                     fontSize: '24px',
                     cursor: (ticketCount <= 1 || game.status === 'running') ? 'not-allowed' : 'pointer',
@@ -816,7 +818,7 @@ export default function Game() {
                     padding: '15px',
                     borderRadius: '12px',
                     border: 'none',
-                    backgroundColor: game.status === 'running' ? '#555' : '#0565ff',
+                    backgroundColor: game.status === 'running' ? '#555' : '#780e9590',
                     color: '#fff',
                     fontSize: '16px',
                     fontWeight: 'bold',
@@ -836,7 +838,7 @@ export default function Game() {
                     height: '40px',
                     borderRadius: '50%',
                     border: 'none',
-                    backgroundColor: game.status === 'running' ? '#555' : '#0565ff',
+                    backgroundColor: game.status === 'running' ? '#555' : '#780e9590',
                     color: '#fff',
                     fontSize: '24px',
                     cursor: game.status === 'running' ? 'not-allowed' : 'pointer',
