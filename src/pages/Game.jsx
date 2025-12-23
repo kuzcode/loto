@@ -13,7 +13,10 @@ import {
   getActiveGameForUser,
 } from '../utils/gameManager';
 import barrelSound from '../clicksound.mp3';
-import { playWinSound, playLooseSound, playClickSound } from '../utils/soundManager';
+import { playWinSound, playLooseSound, playClickSound, toggleSound, isSoundEnabled } from '../utils/soundManager';
+import crown from '../icons/crown.png'
+import person from '../icons/person.png'
+import ticket from '../icons/ticket.png'
 
 export default function Game() {
   const { id } = useParams();
@@ -32,6 +35,7 @@ export default function Game() {
   const [jackpotWon, setJackpotWon] = useState(false);
   const [jackpotAmount, setJackpotAmount] = useState(0);
   const [showWinAnimation, setShowWinAnimation] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
   const previousDrawnCountRef = useRef(0);
   const audioRef = useRef(null);
   const gameStatusRef = useRef(null);
@@ -126,15 +130,15 @@ export default function Game() {
                 if (result.realWinners.length > 0 && result.realWinners.includes(user?.$id) && appwriteIds.usersCollectionId && !prizeProcessedRef.current) {
                   prizeProcessedRef.current = true;
                   jackpotProcessedRef.current = true;
-                  
+
                   const totalStake = currentGame.totalPlayers * currentGame.stake;
                   const winnerCount = result.realWinners.length;
                   const prize = (totalStake / winnerCount) * 0.9;
-                  
+
                   // Розыгрыш джекпота с вероятностью 5%
                   const wonJackpot = Math.random() < 0.05;
                   const jackpotValue = wonJackpot && currentGame.jackpot ? currentGame.jackpot : 0;
-                  
+
                   if (wonJackpot && currentGame.jackpot) {
                     setJackpotWon(true);
                     setJackpotAmount(currentGame.jackpot);
@@ -167,7 +171,7 @@ export default function Game() {
               const realWinners = (currentGame.winners || []).filter(w => !w.startsWith('bot_'));
               const userWon = realWinners.includes(user?.$id);
               setIsWinner(userWon);
-              
+
               // Воспроизвести звук выигрыша или проигрыша
               if (userWon) {
                 playWinSound();
@@ -177,19 +181,19 @@ export default function Game() {
               } else {
                 playLooseSound();
               }
-              
+
               // Начислить выигрыш и джекпот при завершении игры по времени
               if (userWon && appwriteIds.usersCollectionId && !prizeProcessedRef.current) {
                 prizeProcessedRef.current = true;
-                
+
                 const totalStake = currentGame.totalPlayers * currentGame.stake;
                 const winnerCount = realWinners.length;
                 const prize = winnerCount > 0 ? (totalStake / winnerCount) * 0.9 : 0;
-                
+
                 // Розыгрыш джекпота с вероятностью 5%
                 const wonJackpot = Math.random() < 0.05;
                 const jackpotValue = wonJackpot && currentGame.jackpot ? currentGame.jackpot : 0;
-                
+
                 if (wonJackpot && currentGame.jackpot) {
                   setJackpotWon(true);
                   setJackpotAmount(currentGame.jackpot);
@@ -250,11 +254,16 @@ export default function Game() {
 
   // Убрали автоматический редирект - пользователь сам решает, что делать после игры
 
+  // Инициализация состояния звука
+  useEffect(() => {
+    setSoundOn(isSoundEnabled());
+  }, []);
+
   // Инициализация аудио
   useEffect(() => {
     audioRef.current = new Audio(barrelSound);
     audioRef.current.volume = 0.5; // Установить громкость (0.0 - 1.0)
-    
+
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -266,10 +275,10 @@ export default function Game() {
   // Воспроизведение звука при выпадении нового числа
   useEffect(() => {
     if (!game) return;
-    
+
     const currentStatus = game.status;
     const prevStatus = gameStatusRef.current;
-    
+
     // Если игра только что перешла в статус 'running', инициализировать счетчик
     if (currentStatus === 'running' && prevStatus !== 'running') {
       // Игра только что началась - установить счетчик на текущее количество чисел
@@ -278,7 +287,7 @@ export default function Game() {
       gameStatusRef.current = currentStatus;
       return;
     }
-    
+
     // Если игра не активна, сбросить счетчик
     if (currentStatus !== 'running') {
       if (prevStatus === 'running') {
@@ -288,11 +297,11 @@ export default function Game() {
       gameStatusRef.current = currentStatus;
       return;
     }
-    
+
     // Игра активна ('running') - проверить, появилось ли новое число
     if (currentStatus === 'running' && drawnNumbers.length > previousDrawnCountRef.current) {
       // Новое число выпало - воспроизвести звук
-      if (audioRef.current) {
+      if (soundOn && audioRef.current) {
         try {
           // Сбросить время воспроизведения на начало для повторного воспроизведения
           audioRef.current.currentTime = 0;
@@ -306,9 +315,9 @@ export default function Game() {
       }
       previousDrawnCountRef.current = drawnNumbers.length;
     }
-    
+
     gameStatusRef.current = currentStatus;
-  }, [drawnNumbers, game]);
+  }, [drawnNumbers, game, soundOn]);
 
   async function buyTickets() {
     if (!game || !user?.$id || isInGame) return;
@@ -359,8 +368,10 @@ export default function Game() {
         appwriteIds.databaseId,
         appwriteIds.usersCollectionId,
         user.$id,
-        { balance: +(balance - totalCost).toFixed(2),
-          played: played + 1 }
+        {
+          balance: +(balance - totalCost).toFixed(2),
+          played: played + 1
+        }
       );
       window.dispatchEvent(new CustomEvent('balance-changed'));
 
@@ -394,7 +405,7 @@ export default function Game() {
   // Обновить конкретный билет (регенерировать случайно)
   function updateTicket(cardIdx) {
     if (isInGame) return; // Нельзя обновлять билеты после покупки
-    
+
     const updatedCards = [...userCards];
     updatedCards[cardIdx] = generateCard3x9();
     setUserCards(updatedCards);
@@ -404,7 +415,7 @@ export default function Game() {
   function deleteTicket(cardIdx) {
     if (isInGame) return; // Нельзя удалять билеты после покупки
     if (userCards.length <= 1) return; // Должен остаться хотя бы один билет
-    
+
     const updatedCards = userCards.filter((_, idx) => idx !== cardIdx);
     setUserCards(updatedCards);
     setTicketCount(updatedCards.length);
@@ -420,6 +431,30 @@ export default function Game() {
 
     return last5.reverse();
   }, [drawnNumbers]);
+
+  // Функция для форматирования времени
+  function formatTime(seconds) {
+    if (seconds === null || seconds === undefined) return '00:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  }
+
+  // Получить название игры по ставке
+  function getGameTitle(stake) {
+    const titles = ['LITE', 'PRO', 'PRIME', 'ELITE', 'PRIME'];
+    const stakes = [0.2, 0.5, 1, 2, 10];
+    const index = stakes.indexOf(stake);
+    return index !== -1 ? titles[index] : 'ИГРА';
+  }
+
+  // Получить цвет для названия игры
+  function getGameColor(stake) {
+    const colors = ['#9fc057', '#83a9f6', '#fc8d65', '#986ff2', '#c8cce2'];
+    const stakes = [0.2, 0.5, 1, 2, 10];
+    const index = stakes.indexOf(stake);
+    return index !== -1 ? colors[index] : '#83a9f6';
+  }
 
   // Получить статистику по карточкам (только ближайшие к победе)
   const cardsProgress = useMemo(() => {
@@ -473,27 +508,38 @@ export default function Game() {
             justifyContent: 'center',
             alignItems: 'center',
           }}>
+            <div className="lines">
+              <div className="r"></div>
+              <div className="r"></div>
+            </div>
+
             {last5Numbers.map((num, idx) => {
               const isLatest = idx === 0; // Первое окошко (самое новое число) - самое большое
               return (
                 <div
                   key={idx}
+                  className='barrel'
                   style={{
-                    width: isLatest ? '70px' : '50px',
-                    height: isLatest ? '70px' : '50px',
-                    borderRadius: '50%',
-                    backgroundColor: num ? '#780e9590' : '#333',
-                    color: '#fff',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: isLatest ? '32px' : '24px',
-                    fontWeight: 'bold',
-                    border: isLatest ? '3px solid #fff' : '2px solid #666',
-                    transition: 'all 0.3s ease',
+                    width: isLatest ? '90px' : '65px',
+                    height: isLatest ? '90px' : '65px',
+                    fontSize: isLatest ? '36px' : '23px',
                   }}
                 >
-                  {num !== null ? num : ''}
+                  <div className="l1">
+                    <div className="l2">
+                      <div className="l3">
+                        <div className="l4">
+                          <p
+                            style={{
+                              marginTop: isLatest ? '30px' : '18px',
+                            }}
+                          >
+                            {num !== null ? num : ''}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -501,36 +547,134 @@ export default function Game() {
         )}
 
         {/* Статистика карточек (только во время игры) */}
-        {game.status === 'running' && Object.keys(cardsProgress).length > 0 && (
+        {game.status === 'running' && (
           <div style={{
-            backgroundColor: '#2b2d3390',
+            backgroundColor: '#2c3548',
             padding: '15px',
             borderRadius: '12px',
             marginBottom: '20px',
-            textAlign: 'center',
           }}>
-            {Object.entries(cardsProgress)
-              .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
-              .map(([remaining, count]) => (
-                <span
-                  key={remaining}
-                  style={{
-                    color: '#fff',
-                    padding: '6px 12px',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                  }}
-                >
-                  {count} {count === 1 ? 'карточка' : count < 5 ? 'карточки' : 'карточек'} ожидает {remaining} {remaining === 1 ? 'номер' : remaining < 5 ? 'номера' : 'номеров'}
-                </span>
-              ))}
+            {/* Верхняя строка с информацией */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '20px',
+              marginBottom: '15px',
+              flexWrap: 'wrap',
+            }}>
+              {/* Приз */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+              }}>
+                <div style={{
+                  backgroundColor: '#986ff2',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <img src={crown} alt="приз" style={{ width: '24px', height: '24px' }} />
+                </div>
+                <div>
+                  <div style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', lineHeight: '1.2' }}>
+                    {game.jackpot ? game.jackpot.toFixed(2) : '0.00'}₼
+                  </div>
+                </div>
+              </div>
+
+              {/* Количество игроков */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+              }}>
+                <div style={{
+                  backgroundColor: '#83a9f6',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <img src={person} alt="игроки" style={{ width: '24px', height: '24px' }} />
+                </div>
+                <div>
+                  <div style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', lineHeight: '1.2' }}>
+                    {game.totalPlayers || 0}
+                  </div>
+                </div>
+              </div>
+
+              {/* Кнопка звука */}
+              <button
+                onClick={() => {
+                  const newState = toggleSound();
+                  setSoundOn(newState);
+                }}
+                style={{
+                  backgroundColor: '#4a5568',
+                  width: '40px',
+                  height: '40px',
+                  borderRadius: '50%',
+                  border: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  cursor: 'pointer',
+                  padding: 0,
+                }}
+                title={soundOn ? 'Выключить звук' : 'Включить звук'}
+              >
+                {soundOn ? (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 9V15H7L12 20V4L7 9H3ZM16.5 12C16.5 10.23 15.5 8.71 14 7.97V16.02C15.5 15.29 16.5 13.77 16.5 12ZM14 3.23V5.29C16.89 6.15 19 8.83 19 12C19 15.17 16.89 17.85 14 18.71V20.77C18.01 19.86 21 16.28 21 12C21 7.72 18.01 4.14 14 3.23Z" fill="#fff" />
+                  </svg>
+                ) : (
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16.5 12C16.5 10.23 15.5 8.71 14 7.97V16.02C15.5 15.29 16.5 13.77 16.5 12ZM19 3.27L16.5 5.77L14 3.27V5.29C12.62 6.06 11.57 7.31 11.11 8.77L9.71 7.37C10.26 5.63 11.5 4.19 13.14 3.27H14V3.27ZM19 12C19 14.19 18.1 16.16 16.64 17.57L18.05 18.98C19.95 17.22 21 14.76 21 12C21 7.72 18.01 4.14 14 3.23V5.29C16.89 6.15 19 8.83 19 12ZM3 9V15H7L12 20V4L7 9H3Z" fill="#fff" />
+                    <path d="M21.5 4.5L4.5 21.5L3.5 20.5L20.5 3.5L21.5 4.5Z" fill="#fff" />
+                  </svg>
+                )}
+              </button>
+            </div>
+
+            {/* Подпись про карточки */}
+            {Object.keys(cardsProgress).length > 0 && (
+              <div style={{
+                textAlign: 'center',
+                paddingTop: '10px',
+                borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+              }}>
+                {Object.entries(cardsProgress)
+                  .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
+                  .map(([remaining, count]) => (
+                    <span
+                      key={remaining}
+                      style={{
+                        color: '#fff',
+                        fontSize: '13px',
+                        display: 'inline-block',
+                        margin: '0 5px',
+                      }}
+                    >
+                      {count} {count === 1 ? 'карточка' : count < 5 ? 'карточки' : 'карточек'} ожидает {remaining} {remaining === 1 ? 'номер' : remaining < 5 ? 'номера' : 'номеров'}
+                    </span>
+                  ))}
+              </div>
+            )}
           </div>
         )}
 
         {/* Блок "Вы в игре" */}
         {isInGame && (
           <div style={{
-            backgroundColor: '#780e9590',
+            backgroundColor: '#2c3548',
             padding: '15px',
             borderRadius: '12px',
             marginBottom: '20px',
@@ -559,7 +703,7 @@ export default function Game() {
 
         {/* Анимация выигрыша */}
         {showWinAnimation && isWinner && (
-          <div 
+          <div
             className="win-animation"
             style={{
               position: 'fixed',
@@ -567,7 +711,7 @@ export default function Game() {
               left: '50%',
               transform: 'translate(-50%, -50%)',
               zIndex: 9999,
-              backgroundColor: '#780e9590',
+              backgroundColor: '#2c3548',
               padding: '40px 60px',
               borderRadius: '20px',
               textAlign: 'center',
@@ -586,7 +730,7 @@ export default function Game() {
         {/* Сообщение о завершении игры */}
         {gameFinished && (
           <div style={{
-            backgroundColor: isWinner ? '#780e9590' : '#ff5733',
+            backgroundColor: isWinner ? '#2c3548' : '#ff5733',
             padding: '20px',
             borderRadius: '12px',
             marginBottom: '20px',
@@ -609,7 +753,7 @@ export default function Game() {
                 marginTop: '15px',
                 padding: '12px 24px',
                 backgroundColor: '#fff',
-                color: isWinner ? '#780e9590' : '#ff5733',
+                color: isWinner ? '#2c3548' : '#ff5733',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '16px',
@@ -672,7 +816,7 @@ export default function Game() {
                       padding: '8px 16px',
                       borderRadius: '8px',
                       border: 'none',
-                      backgroundColor: '#780e9590',
+                      backgroundColor: '#2c3548',
                       color: '#fff',
                       fontSize: '14px',
                       fontWeight: 'bold',
@@ -680,7 +824,7 @@ export default function Game() {
                       transition: 'background-color 0.2s',
                     }}
                     onMouseOver={(e) => e.target.style.backgroundColor = '#0452cc'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#780e9590'}
+                    onMouseOut={(e) => e.target.style.backgroundColor = '#2c3548'}
                   >
                     Обновить
                   </button>
@@ -714,7 +858,7 @@ export default function Game() {
                 </div>
               )}
               <div className='loto-card' style={{
-                backgroundColor: '#fff',
+                backgroundColor: '#c3d1e5',
                 padding: '15px',
                 borderRadius: '12px',
               }}>
@@ -722,29 +866,58 @@ export default function Game() {
                   <div key={rowIdx} className='loto-row-9' style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(9, 1fr)',
-                    gap: '4px',
+                    gap: '2px',
                   }}>
-                    {row.map((num, colIdx) => (
-                      <div
-                        key={colIdx}
-                        style={{
-                          padding: '6px',
-                          textAlign: 'center',
-                          backgroundColor: num && isMarked(num) ? '#780e9590' : num ? '#f0f0f0' : 'transparent',
-                          color: num && isMarked(num) ? '#fff' : '#000',
-                          borderRadius: '6px',
-                          minHeight: '40px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginBottom: '2px',
-                          marginTop: '2px',
-                          fontWeight: num && isMarked(num) ? 'bold' : 'normal',
-                        }}
-                      >
-                        {num ?? ''}
-                      </div>
-                    ))}
+                    {row.map((num, colIdx) => {
+                      const marked = num && isMarked(num);
+                      const hasNumber = !!num;
+                      return (
+                        <div
+                          key={colIdx}
+                          style={{
+                            padding: '6px',
+                            textAlign: 'center',
+                            backgroundColor: hasNumber ? '#c3d1e5' : '#99a8c2',
+                            color: '#2a3143',
+                            borderRadius: '10px',
+                            minHeight: '40px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            marginBottom: '1px',
+                            marginTop: '1px',
+                            position: 'relative',
+                            border: 'solid 1px rgba(136, 142, 175, 0.4)',
+                          }}
+                        >
+                          {marked && (
+                            <div
+                              style={{
+                                position: 'absolute',
+                                width: '70%',
+                                height: '70%',
+                                borderRadius: '50%',
+                                backgroundColor: '#986ff2',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                              }}
+                            />
+                          )}
+                          <span
+                            style={{
+                              position: 'relative',
+                              fontWeight: 700,
+                              fontSize: 20,
+                              zIndex: 1,
+                              mixBlendMode: marked ? 'overlay' : 'normal',
+                            }}
+                          >
+                            {num ?? ''}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 ))}
               </div>
@@ -762,98 +935,163 @@ export default function Game() {
             width: '100%',
             maxWidth: '500px',
             padding: '0 20px',
+            zIndex: 2,
             boxSizing: 'border-box',
           }}>
-            <div
-              className='blurred'
-              style={{
-                backgroundColor: '#2b2d3390',
-                padding: '20px',
-                borderRadius: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '15px',
-              }}>
-              {game.status === 'running' && (
-                <p style={{
-                  margin: '0 0 10px 0',
-                  color: '#ff5733',
-                  fontSize: '14px',
-                  textAlign: 'center'
-                }}>
-                  Покупка билетов недоступна во время игры
-                </p>
-              )}
+            {/* Верхняя панель: название игры и селектор количества */}
+            <div style={{
+              backgroundColor: '#2c3548',
+              padding: '12px 16px',
+              borderRadius: '12px',
+              marginBottom: '12px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}>
+              {/* Левая часть: иконка билета и название */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '15px',
+                gap: '10px',
+              }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  backgroundColor: getGameColor(game.stake),
+                  borderRadius: '6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                  <img src={ticket} alt="билет" style={{ width: '20px', height: '20px' }} />
+                </div>
+                <div style={{ color: '#fff', fontSize: '16px', fontWeight: 500 }}>
+                  {getGameTitle(game.stake)} {game.stake.toFixed(2)}₼
+                </div>
+              </div>
+
+              {/* Правая часть: селектор количества */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
               }}>
                 <button
-                  onClick={() => setTicketCount(Math.max(1, ticketCount - 1))}
+                  onClick={() => {
+                    playClickSound();
+                    setTicketCount(Math.max(1, ticketCount - 1));
+                  }}
                   disabled={ticketCount <= 1 || game.status === 'running'}
                   style={{
-                    width: '40px',
-                    height: '40px',
+                    width: '32px',
+                    height: '32px',
                     borderRadius: '50%',
                     border: 'none',
-                    backgroundColor: (ticketCount <= 1 || game.status === 'running') ? '#555' : '#780e9590',
+                    backgroundColor: (ticketCount <= 1 || game.status === 'running') ? '#4a5568' : '#4a5568',
                     color: '#fff',
-                    fontSize: '24px',
+                    fontSize: '20px',
+                    fontWeight: 'bold',
                     cursor: (ticketCount <= 1 || game.status === 'running') ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    padding: 0,
                   }}
                 >
                   -
                 </button>
+                <div style={{
+                  color: '#fff',
+                  fontSize: '18px',
+                  fontWeight: 600,
+                  minWidth: '30px',
+                  textAlign: 'center',
+                }}>
+                  {ticketCount}
+                </div>
                 <button
-                  className='b2'
-                  onClick={buyTickets}
-                  disabled={loading || game.status === 'running'}
-                  style={{
-                    flex: 1,
-                    padding: '15px',
-                    borderRadius: '12px',
-                    border: 'none',
-                    backgroundColor: game.status === 'running' ? '#555' : '#780e9590',
-                    color: '#fff',
-                    fontSize: '16px',
-                    fontWeight: 'bold',
-                    cursor: (loading || game.status === 'running') ? 'not-allowed' : 'pointer',
+                  onClick={() => {
+                    playClickSound();
+                    setTicketCount(ticketCount + 1);
                   }}
-                >
-                  {loading ? '...' : `Купить билет${ticketCount > 1 ? 'ы' : ''}`}
-                  <div style={{ fontSize: '14px', marginTop: '4px', opacity: 0.9 }}>
-                    {(game.stake * ticketCount).toFixed(2)}₼
-                  </div>
-                </button>
-                <button
-                  onClick={() => setTicketCount(ticketCount + 1)}
                   disabled={game.status === 'running'}
                   style={{
-                    width: '40px',
-                    height: '40px',
+                    width: '32px',
+                    height: '32px',
                     borderRadius: '50%',
                     border: 'none',
-                    backgroundColor: game.status === 'running' ? '#555' : '#780e9590',
+                    backgroundColor: game.status === 'running' ? '#4a5568' : getGameColor(game.stake),
                     color: '#fff',
-                    fontSize: '24px',
+                    fontSize: '20px',
+                    fontWeight: 'bold',
                     cursor: game.status === 'running' ? 'not-allowed' : 'pointer',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    padding: 0,
                   }}
                 >
                   +
                 </button>
               </div>
             </div>
+
+            {/* Нижняя кнопка покупки с таймером */}
+            <button
+              className='b2'
+              onClick={buyTickets}
+              disabled={loading || game.status === 'running'}
+              style={{
+                width: '100%',
+                padding: '14px 16px',
+                borderRadius: '12px',
+                border: 'none',
+                backgroundColor: game.status === 'running' ? '#4a5568' : '#83a9f6',
+                color: '#fff',
+                fontSize: '16px',
+                fontWeight: 600,
+                cursor: (loading || game.status === 'running') ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: '16px',
+                minHeight: '48px',
+              }}
+            >
+              {/* Левая часть: прогресс-бар (если статус counting) */}
+              {game.status === 'counting' && game.startCountdown !== null ? (
+                <div className='countdown-progress' style={{
+                  width: 150,
+                  minWidth: 0,
+                  height: '24px',
+                }}>
+                  <div
+                    className='countdown-progress-bar'
+                    style={{
+                      width: `${((60 - (game.startCountdown || 0)) / 60) * 100}%`
+                    }}
+                  />
+                  <span className='countdown-time'>
+                    {formatTime(Math.ceil(game.startCountdown || 0))}
+                  </span>
+                </div>
+              ) : (
+                <div style={{ flex: '1 1 auto' }}></div>
+              )}
+
+              {/* Правая часть: текст покупки */}
+              <div style={{
+                flex: '0 0 auto',
+                pointerEvents: 'none',
+                opacity: game.status === 'running' ? 0.5 : 1,
+                whiteSpace: 'nowrap',
+              }}>
+                Купить {(game.stake * ticketCount).toFixed(2)}₼
+              </div>
+            </button>
           </div>
         )}
       </div>
-    </div>
+    </div >
   );
 }

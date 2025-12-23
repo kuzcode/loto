@@ -1,5 +1,5 @@
 .App {
-  background: #361340;
+  background: #2a3143;
   min-height: 100vh;
   margin: 0;
   padding-bottom: 100px;
@@ -99,8 +99,10 @@
 /* Bottom bar */
 .with-bar {
   position: relative;
-  padding-top: 56px; /* space for header */
-  padding-bottom: 74px; /* space for bar */
+  padding-top: 56px;
+  /* space for header */
+  padding-bottom: 74px;
+  /* space for bar */
   height: 100vh;
   box-sizing: border-box;
 }
@@ -111,15 +113,15 @@
   transform: translateX(-50%);
   bottom: 12px;
   width: 90%;
-  max-width: 500px;
-  background: #780e9590;
-  border-radius: 20px;
+  max-width: 400px;
+  background: #2c3548;
+  border-radius: 100px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  padding: 16px 6px 16px 6px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  padding: 6px 6px 6px 6px;
+  box-shadow: 0 0 32px #0000006b;
+  z-index: 3;
 }
 
 .blurred {
@@ -131,19 +133,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
   color: #fff;
   text-decoration: none;
-  opacity: 0.8;
+  opacity: 0.7;
+  padding: 16px 36px;
+  border-radius: 100px;
+  transition: .2s;
 }
 
 .bb-item.active {
   opacity: 1;
+  background: #83a9f6;
 }
 
 .bb-item img {
-  width: 24px;
-  height: 24px;
+  width: 25px;
+  height: 25px;
   filter: invert(1);
 }
 
@@ -159,13 +164,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #780e9590;
   padding: 0 16px;
   box-sizing: border-box;
-  border-radius: 20px;
   z-index: 9999;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .top-bar .logo {
@@ -190,7 +191,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: linear-gradient(to bottom, #e1b30f, #d57909);
+  background: linear-gradient(to bottom, #83a9f6, #8395f6);
   font-weight: 700;
 }
 
@@ -290,7 +291,7 @@
   max-width: 500px;
   margin: 20px auto;
   padding: 0 16px;
-  background: #361340;
+  background: #2a3143;
 }
 
 .chat-form {
@@ -340,26 +341,149 @@
 }
 
 .game-card {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 12px;
-  color: #000000;
-  margin: 12px 0;
-  border: 5px solid #ffcb5c90;
+  border-radius: 32px;
+  padding: 16px 28px;
+  color: #2a3143;
+  max-width: 400px;
+  margin: 12px auto;
+  box-shadow: 0 0 32px #00000026, inset 0 0 32px #1515175f;
+  border: 1px solid #ffffff7f;
+  overflow: hidden;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.bag {
+  width: 120px;
+  height: 120px;
+  margin: -20px -24px 0 0;
+  filter: drop-shadow(0 0 40px #ffd00090);
+}
+
+.ingame {
+  margin: 0;
+  font-weight: 400;
+}
+
+.col2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .win {
-  color: #11961e;
-  font-weight: 700;
+  color: #2a3143;
+  font-weight: 400;
   font-size: 16px;
-  margin: -10 0 0 0;
+  text-align: center;
+  line-height: 40px;
+  margin: 0;
+}
+
+.crown {
+  width: 21px;
+  height: 20px;
+  margin: 0;
+  object-fit: contain;
+  mix-blend-mode: overlay;
+  background-blend-mode: overlay;
+}
+
+.prize {
+  position: relative;
+  /* добавлено */
+  background: #3232323f;
+  padding: 4px 32px;
+  border-radius: 100px;
+  font-weight: 700;
+  overflow: hidden;
+  /* чтобы bg не выходил за границы */
+  box-shadow: 0 0 200px #fff;
+  border: 1.5px solid #ffffff65;
+}
+
+.prize p {
+  font-size: 26px;
+  margin: 0;
+  color: #fff;
+}
+
+.prize .bg {
+  position: absolute;
+  /* добавлено */
+  top: 0;
+  /* добавлено */
+  left: 0;
+  /* добавлено */
+  width: 100%;
+  height: 100%;
+  background: #6c6c6c;
+  mix-blend-mode: overlay;
+  background-blend-mode: overlay;
+  border-radius: 100px;
+  box-shadow: inset 0 0 20px #00000077;
+  opacity: 0.6;
+}
+
+
+.status {
+  background: #555555;
+  mix-blend-mode: overlay;
+  background-blend-mode: overlay;
+  padding: 4px 8px;
+  border-radius: 100px;
+  margin: 0;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 13px;
+  color: #fff;
+}
+
+.countdown-progress {
+  position: relative;
+  background: rgba(255, 255, 255, 0.3);
+  height: 24px;
+  border-radius: 100px;
+  overflow: hidden;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.countdown-progress-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: #fff;
+  border-radius: 100px;
+  transition: width 0.3s ease;
+}
+
+.countdown-time {
+  position: relative;
+  z-index: 1;
+  color: #2a3143;
+  font-weight: 600;
+  font-size: 14px;
 }
 
 .stake {
-  background: linear-gradient(to bottom, #0cb607, #038a2b);
-  padding: 4px 8px;
-  border-radius: 20px;
-  color: #fff;
+  font-weight: 700;
+  font-size: 24px;
+  margin: 0;
+}
+
+.people {
+  width: 18px;
+  height: 20px;
+  margin-top: 4px;
 }
 
 .jackpot {
@@ -367,6 +491,28 @@
   padding: 6px 12px;
   border-radius: 8px;
   color: #fff;
+
+  display: none;
+}
+
+.prev {
+  display: flex;
+  align-items: center;
+}
+
+.prev p {
+  text-wrap: nowrap;
+}
+
+.prev .line {
+  height: 2px;
+  width: 100%;
+  background: #555555;
+  mix-blend-mode: overlay;
+  background-blend-mode: overlay;
+  margin-left: 12px;
+  border-radius: 4px;
+  margin-top: 4px;
 }
 
 .game-row {
@@ -383,7 +529,8 @@
   opacity: 0.8;
 }
 
-.game-players, .game-jackpot {
+.game-players,
+.game-jackpot {
   opacity: 0.9;
 }
 
@@ -409,37 +556,44 @@
 .game-area {
   color: #fff;
 }
+
 .loto {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
   margin-top: 12px;
 }
+
 .loto-card {
   background: #780e9590;
   padding: 12px;
   border-radius: 12px;
 }
+
 .loto-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
+
 .cell {
   background: #2d2f36;
   border-radius: 10px;
   text-align: center;
   padding: 10px 0;
 }
+
 .cell.marked {
   background: #780e9590;
   color: #fff;
 }
+
 .bag {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
+
 .chip {
   background: #2d2f36;
   color: #fff;
@@ -461,13 +615,15 @@
 }
 
 .playingarea {
-  background: #361340;
+  background: #2a3143;
   margin: 20px auto;
   padding: 12px 16px 80px 16px;
   max-width: 500px;
 }
 
-.playingarea p, .playingarea h2, .playingarea div {
+.playingarea p,
+.playingarea h2,
+.playingarea div {
   color: #fff;
 }
 
@@ -482,4 +638,94 @@
 .chatp {
   color: #636363;
   text-align: center;
+}
+
+
+.barrel {
+  border-radius: 50%;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.l1 {
+  box-shadow: 20px 14px 24px 0 rgba(0, 0, 0, 0.4), inset -2px -4px 5px 0 #252048;
+  background-image: radial-gradient(circle at 19% 20%, #a490fa, #6961aa 73%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.l2 {
+  background-image: linear-gradient(311deg, #b7a7ff 85%, #2b284a 15%);
+  width: calc(100% - 10px);
+  height: calc(100% - 10px);
+  border-radius: 50%;
+  margin-top: -2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.l3 {
+  box-shadow: inset 0 3px 15px 0 rgba(0, 0, 0, 0.5);
+  background-image: radial-gradient(circle at 65% 77%, #4f586e, #2c313e 56%);
+  width: calc(100% - 7px);
+  height: calc(100% - 7px);
+  border-radius: 50%;
+  margin-top: -2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.l4 {
+  border: solid 1.5px #ffffff31;
+  box-shadow: inset 0 0 8px #0000006b;
+  border-radius: 50%;
+  width: calc(100% - 9px);
+  height: calc(100% - 9px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.barrel p {
+  text-align: center;
+  color: #8f83f8;
+  text-shadow: 0 2px 5px #000000b3, 0 1px 0 #ffffffcc;
+}
+
+.lines {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: absolute;
+  max-width: 420px;
+  z-index: 0;
+}
+
+.r {
+  height: 12px;
+  width: 100%;
+  background: #38445d;
+  border-radius: 50px;
+  margin: 8px 0;
+}
+
+.unit img {
+  width: 25px;
+  height: 25px;
+}
+
+.ticon {
+  width: 21.5px;
+  height: 16px;
 }
