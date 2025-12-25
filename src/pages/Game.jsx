@@ -520,9 +520,9 @@ export default function Game() {
                   key={idx}
                   className='barrel'
                   style={{
-                    width: isLatest ? '90px' : '65px',
-                    height: isLatest ? '90px' : '65px',
-                    fontSize: isLatest ? '36px' : '23px',
+                    width: isLatest ? 'calc(1vw + 75px)' : 'calc(1vw + 60px)',
+                    height: isLatest ? 'calc(1vw + 75px)' : 'calc(1vw + 60px)',
+                    fontSize: isLatest ? 'calc(0.8vw + 25px)' : 'calc(0.8vw + 18px)',
                   }}
                 >
                   <div className="l1">
