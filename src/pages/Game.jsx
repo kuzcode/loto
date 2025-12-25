@@ -801,30 +801,34 @@ export default function Game() {
             <div key={cardIdx} style={{
               display: 'flex',
               flexDirection: 'column',
-              gap: '10px',
+              alignItems: 'center',
             }}>
               {/* Кнопки обновления и удаления (только до покупки билетов) */}
               {!isInGame && game.status !== 'finished' && game.status !== 'running' && (
                 <div style={{
                   display: 'flex',
-                  gap: '10px',
-                  justifyContent: 'flex-end',
+                  justifyContent: 'space-between',
+                  backgroundColor: '#c3d1e5',
+                  borderRadius: '18px 18px 0 0',
+                  padding: '8px',
+                  width: 'calc(100% - 20px)'
                 }}>
                   <button
                     onClick={() => updateTicket(cardIdx)}
                     style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
+                      padding: '4px 16px',
+                      borderRadius: '20px',
                       border: 'none',
-                      backgroundColor: '#2c3548',
-                      color: '#fff',
-                      fontSize: '14px',
+                      backgroundColor: '#38445d',
+                      boxShadow: '-4px 4px 12px 0 rgba(0, 0, 0, 0.24)',
+                      color: '#c8cce2',
+                      fontSize: '13px',
                       fontWeight: 'bold',
                       cursor: 'pointer',
-                      transition: 'background-color 0.2s',
+                      transition: '0.2s',
                     }}
-                    onMouseOver={(e) => e.target.style.backgroundColor = '#0452cc'}
-                    onMouseOut={(e) => e.target.style.backgroundColor = '#2c3548'}
+                    onMouseOver={(e) => e.target.style.transform = 'scale(1.02)'}
+                    onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                   >
                     Обновить
                   </button>
@@ -832,25 +836,18 @@ export default function Game() {
                     onClick={() => deleteTicket(cardIdx)}
                     disabled={userCards.length <= 1}
                     style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
+                      padding: '4px 16px',
+                      borderRadius: '20px',
                       border: 'none',
-                      backgroundColor: userCards.length <= 1 ? '#555' : '#ff5733',
+                      backgroundColor: '#38445d',
+                      boxShadow: '-4px 4px 12px 0 rgba(0, 0, 0, 0.24)',
+                      color: '#c8cce2',
+                      opacity: userCards.length <= 1 ? 0.5 : 1,
                       color: '#fff',
-                      fontSize: '14px',
+                      fontSize: '13px',
                       fontWeight: 'bold',
                       cursor: userCards.length <= 1 ? 'not-allowed' : 'pointer',
                       transition: 'background-color 0.2s',
-                    }}
-                    onMouseOver={(e) => {
-                      if (userCards.length > 1) {
-                        e.target.style.backgroundColor = '#cc4526';
-                      }
-                    }}
-                    onMouseOut={(e) => {
-                      if (userCards.length > 1) {
-                        e.target.style.backgroundColor = '#ff5733';
-                      }
                     }}
                   >
                     Удалить
@@ -861,6 +858,7 @@ export default function Game() {
                 backgroundColor: '#c3d1e5',
                 padding: '15px',
                 borderRadius: '12px',
+                width: '100%'
               }}>
                 {card.map((row, rowIdx) => (
                   <div key={rowIdx} className='loto-row-9' style={{
@@ -963,7 +961,8 @@ export default function Game() {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <img src={ticket} alt="билет" style={{ width: '20px', height: '20px' }} />
+                  {// <img src={ticket} alt="билет" style={{ width: '20px', height: '20px' }} />
+}
                 </div>
                 <div style={{ color: '#fff', fontSize: '16px', fontWeight: 500 }}>
                   {getGameTitle(game.stake)} {game.stake.toFixed(2)}₼
@@ -1058,7 +1057,7 @@ export default function Game() {
                 minHeight: '48px',
               }}
             >
-              {/* Левая часть: прогресс-бар (если статус counting) */}
+              {/* Левая часть: прогресс-бар или статус */}
               {game.status === 'counting' && game.startCountdown !== null ? (
                 <div className='countdown-progress' style={{
                   width: 150,
@@ -1074,6 +1073,29 @@ export default function Game() {
                   <span className='countdown-time'>
                     {formatTime(Math.ceil(game.startCountdown || 0))}
                   </span>
+                </div>
+              ) : game.status === 'waiting' ? (
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#fff',
+                  background: '#ffffff31',
+                  padding: '4px 12px',
+                  borderRadius: 50,
+                }}>
+                  Идёт набор
+                </div>
+              ) : game.status === 'running' ? (
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: 600,
+                  color: '#fff',
+                  background: '#ffffff1f',
+                  padding: '4px 12px',
+                  borderRadius: 50,
+                  opacity: 0.5,
+                }}>
+                  Идёт игра
                 </div>
               ) : (
                 <div style={{ flex: '1 1 auto' }}></div>

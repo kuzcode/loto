@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { databases, appwriteIds, Query } from '../appwrite';
 import { useAuth } from '../auth/AuthProvider';
+import crown from '../icons/crown.png';
+import profile from '../icons/profile.png';
 
 export default function Leaderboard() {
   const { user } = useAuth();
@@ -47,7 +49,7 @@ export default function Leaderboard() {
               appwriteIds.usersCollectionId,
               user.$id
             );
-            
+
             const balance = Number(userDoc.balance || 0);
             // Показать только если balance > 0
             if (balance > 0) {
@@ -74,6 +76,11 @@ export default function Leaderboard() {
 
   const isCurrentUser = (userId) => userId === user?.$id;
 
+  // Функция для форматирования числа с пробелами
+  const formatBalance = (balance) => {
+    return balance.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+  };
+
   if (loading) {
     return (
       <div className='App'>
@@ -85,38 +92,184 @@ export default function Leaderboard() {
     );
   }
 
+  const topThree = topUsers.slice(0, 3);
+  const otherUsers = topUsers.slice(3);
+
+  const podiumConfig = [
+    { position: 2, rank: 'Второй', color: '#fc8e66' }, // 2 место слева
+    { position: 1, rank: 'Первый', color: '#83a9f6' }, // 1 место по центру
+    { position: 3, rank: 'Третий', color: '#8bc34a' }, // 3 место справа
+  ];
+
   return (
     <div className='App'>
-      <p className='title'>Лидерборд</p>
-      
-      {/* Шапка таблицы */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr 1fr',
-        gap: '10px',
-        fontWeight: 'bold',
-        color: '#fff',
-        fontSize: '14px',
-        padding: 16,
-        maxWidth: 500, margin: '20px auto',
-      }}>
-        <div>Имя</div>
-        <div style={{ textAlign: 'right' }}>Игр</div>
-        <div style={{ textAlign: 'right' }}>Баланс</div>
-      </div>
+      <p className='titlem'>Лидерборд</p>
 
-      {/* Список пользователей */}
+      {/* Топ 3 игрока на пьедестале */}
+      {topThree.length > 0 && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-end',
+          gap: '20px',
+          padding: '20px 16px',
+          maxWidth: 500,
+          margin: '0 auto',
+        }}>
+          {podiumConfig.map((config, idx) => {
+            const userItem = topThree[config.position - 1];
+            if (!userItem) return null;
+
+            return (
+              <div
+                key={userItem.id}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  flex: config.position === 1 ? 1 : 0.9,
+                }}
+              >
+                {/* Аватар в пятиугольнике */}
+                <div
+                  style={{
+                    width: config.position === 1 ? '80px' : '50px',
+                    height: config.position === 1 ? '80px' : '50px',
+                    position: 'relative',
+                    marginBottom: '12px',
+                  }}
+                >
+                  {/* Пятиугольник через clip-path */}
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      backgroundColor: '#2a3143',
+                      border: `3px solid ${config.color}`,
+                      boxShadow: `0 0 6px ${config.color}`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      borderRadius: '50%',
+                      marginBottom: 4
+                    }}
+                  >
+                    <img
+                      src={profile}
+                      alt={userItem.name}
+                      style={{
+                        width: '70%',
+                        height: '70%',
+                        objectFit: 'cover',
+                        padding: 50
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Имя */}
+                <div style={{
+                  color: '#fff',
+                  fontSize: config.position === 1 ? '16px' : '13px',
+                  fontWeight: 700,
+                  marginBottom: '6px',
+                  textAlign: 'center',
+                }}>
+                  {userItem.name}
+                </div>
+
+                {/* Баланс */}
+                <div style={{
+                  color: '#888eaf',
+                  fontSize: config.position === 1 ? '16px' : '13px',
+                  fontWeight: 400,
+                  marginBottom: '12px',
+                  textAlign: 'center',
+                }}>
+                  {formatBalance(userItem.balance)}₼
+                </div>
+
+                {/* Бейдж с градиентом */}
+                <div style={{
+                  padding: config.position === 1 ? '16px 40px' : '10px 28px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '8px',
+                  marginTop: '8px',
+                }}>
+                  <div
+                    style={{
+                      background: `linear-gradient(to bottom, #00000000, ${config.color}, #00000000)`,
+                      borderRadius: '8px',
+                      padding: config.position === 1 ? '20px 45px' : '15px 32px',
+                      alignItems: 'center',
+                      filter: 'blur(25px)',
+                      position: 'absolute',
+                      marginLeft: config.position === 1 ? -18 : -12
+                    }}
+                  ></div>
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 8,
+                    alignItems: 'center'
+                  }}>
+                    <img
+                      src={crown}
+                      alt="crown"
+                      style={{
+                        width: '20px',
+                        height: '20px',
+                        filter: 'brightness(0) invert(1)',
+                        mixBlendMode: 'overlay'
+                      }}
+                    />
+                    <span style={{
+                      color: '#fff',
+                      fontSize: '14px',
+                      fontWeight: 700,
+                    }}>
+                      {config.rank}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Шапка таблицы для остальных */}
+      {otherUsers.length > 0 && (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '2fr 1fr 1fr',
+          gap: '10px',
+          fontWeight: 'bold',
+          color: '#fff',
+          fontSize: '14px',
+          padding: '20px 16px 16px 16px',
+          maxWidth: 500, margin: '0 auto',
+        }}>
+          <div>Имя</div>
+          <div style={{ textAlign: 'right' }}>Игр</div>
+          <div style={{ textAlign: 'right' }}>Баланс</div>
+        </div>
+      )}
+
+      {/* Список остальных пользователей */}
       <div style={{ padding: '0 16px', maxWidth: 500, margin: 'auto', paddingBottom: currentUser ? '100px' : '20px' }}>
         {topUsers.length === 0 ? (
           <p style={{ textAlign: 'center', color: '#fff', padding: '40px' }}>
             Пока нет игроков с балансом
           </p>
         ) : (
-          topUsers.map((userItem, index) => (
+          otherUsers.map((userItem, index) => (
             <div
               key={userItem.id}
               style={{
-                backgroundColor: isCurrentUser(userItem.id) ? '#780e9590' : '#6d0b7f',
+                backgroundColor: isCurrentUser(userItem.id) ? '#8395f6' : '#2c3548',
                 borderRadius: '12px',
                 padding: '15px 20px',
                 marginBottom: '10px',
@@ -129,13 +282,16 @@ export default function Leaderboard() {
               }}
             >
               <div style={{ color: '#fff', fontSize: '16px', fontWeight: isCurrentUser(userItem.id) ? 'bold' : 'normal' }}>
-                {index + 1}. {userItem.name}
+                <span style={{
+                  color: '#888eaf',
+                  marginRight: 8
+                }}>{index + 4}</span>  {userItem.name}
               </div>
               <div style={{ color: '#fff', fontSize: '16px', textAlign: 'right' }}>
                 {userItem.played}
               </div>
               <div style={{ color: '#fff', fontSize: '16px', textAlign: 'right', fontWeight: 'bold' }}>
-                {userItem.balance.toFixed(2)}₼
+                {formatBalance(userItem.balance)}₼
               </div>
             </div>
           ))
@@ -172,7 +328,7 @@ export default function Leaderboard() {
               {currentUser.played}
             </div>
             <div style={{ color: '#fff', fontSize: '16px', textAlign: 'right', fontWeight: 'bold' }}>
-              {currentUser.balance.toFixed(2)}₼
+              {formatBalance(currentUser.balance)}₼
             </div>
           </div>
         </div>

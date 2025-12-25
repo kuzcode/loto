@@ -29,7 +29,9 @@ export default function Login() {
 
   return (
     <div className="App">
-      <p className='title center'>Вход</p>
+      <p className='title' style={{
+        padding: '40px 22px'
+      }}>Войдите в игру</p>
       <form onSubmit={onSubmit} className='auth-form'>
         <div className='inputs'>
           <input
@@ -48,14 +50,42 @@ export default function Login() {
           />
         </div>
         {error ? <p className='auth-error'>{error}</p> : null}
-        <div className='buttons'>
-          <button className='b1' type="submit" disabled={loading}><p>{loading ? '...' : 'Войти'}</p></button>
-          <button className='b2' type='button' onClick={() => navigate('/register')}><p>Регистрация</p></button>
+        <div style={{
+          display: 'flex',
+          maxWidth: 500,
+          margin: '0 auto',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '0 22px',
+        }}>
+          <p style={{
+            color: '#fff',
+            fontSize: 20
+          }}>
+            Войти
+          </p>
+          <button className='b2' type="submit" disabled={loading} style={{
+            border: 'none',
+            padding: '0px 36px',
+            height: 40,
+            borderRadius: 12,
+            cursor: 'pointer',
+            boxShadow: '0 0 20px 0 rgba(0, 0, 0, 0.12)',
+          }}><p style={{margin: 0, fontSize: 17}}>{'>'}</p></button>
         </div>
+
+        <p style={{
+          color: '#c8cce2',
+          margin: '12px auto',
+          maxWidth: 500,
+          padding: '0 22px'
+        }}>Нет аккаунта? <a onClick={() => navigate('/register')} style={{
+          color: '#83a9f6',
+          fontWeight: 500,
+          cursor: 'pointer'
+        }}>Зарегистрируйтесь</a></p>      
+
       </form>
-      <div className='auth-links'>
-        <button className='link-btn' type='button' onClick={() => navigate('/')}>← Назад</button>
-      </div>
     </div>
   );
 }

@@ -9,8 +9,10 @@ import ProtectedLayout from './layouts/ProtectedLayout';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import Deposit from './pages/Deposit';
+import Balance from './pages/Balance';
 import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
+import crown2 from './icons/crown2.png'
 
 function Landing() {
   const navigate = useNavigate();
@@ -21,8 +23,26 @@ function Landing() {
   }
 
   return (
-    <div className="App">
-      <p className='title center'>Лото</p>
+    <div className="App" style={{
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'space-between',
+      padding: 0,
+      top: 0
+    }}>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        maxWidth: 484,
+        width: '100%',
+        margin: '0 auto',
+        alignItems: 'flex-start',
+        padding: '40px 20px 0 20px',
+      }}>
+        <img src={crown2} width={32} height={31} />
+        <p className='title'>ЛОТО.</p>
+        <p className='sub'>- И ничего лишнего</p>
+      </div>
 
       <div className='buttons'>
         <button className='b1' onClick={() => navigate('/login')}><p>Вход</p></button>
@@ -40,8 +60,8 @@ function App() {
           <Route path='/' element={<Landing />} />
           <Route path='/login' element={<Login />} />
           <Route path='/register' element={<Register />} />
-          <Route element={<ProtectedRoute />}> 
-            <Route element={<ProtectedLayout /> }>
+          <Route element={<ProtectedRoute />}>
+            <Route element={<ProtectedLayout />}>
               <Route path='/app' element={<ProtectedApp />} />
               <Route path='/game/:id' element={<Game />} />
               <Route path='/chat' element={<Chat />} />
@@ -49,6 +69,7 @@ function App() {
               <Route path='/profile' element={<Profile />} />
             </Route>
             <Route path='/deposit' element={<Deposit />} />
+            <Route path='/balance' element={<Balance />} />
           </Route>
         </Routes>
       </BrowserRouter>

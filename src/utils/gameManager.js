@@ -198,6 +198,12 @@ export function updateGamesState(games, partialUpdate = false) {
       const timeSinceFinished = (now - finishedAt) / 1000;
       
       if (timeSinceFinished >= 5) {
+        // Сохранить данные последней игры перед сбросом
+        const lastGameDraw = updated.draw && updated.drawIndex > 0 
+          ? updated.draw.slice(0, updated.drawIndex) 
+          : null;
+        const lastGamePrize = updated.prizePerWinner || 0;
+        
         // Сбросить игру через 5 секунд
         return {
           ...updated,
@@ -219,6 +225,8 @@ export function updateGamesState(games, partialUpdate = false) {
         nextBotJoin: now + (Math.random() * 2000 + 500),
         jackpot: Math.floor(Math.random() * (300 - 50 + 1)) + 50, // Новый джекпот от 50 до 300
         jackpotWon: false, // Сбросить флаг выигрыша джекпота
+        lastGameDraw, // Сохранить данные последней игры
+        lastGamePrize, // Сохранить выигрыш последней игры
       };
       }
       // Иначе просто вернуть текущее состояние
