@@ -39,18 +39,58 @@ export default function Deposit() {
   return (
     <div className='deposit-page'>
       <div className='deposit-header'>
-        <button className='link-btn' onClick={() => navigate(-1)}>← Назад</button>
+        <button style={{
+          background: '#2c3548',
+          boxShadow: '0 0 20px #0000005e',
+          border: 'none',
+          borderRadius: 100,
+          color: '#fff',
+          fontSize: 25,
+          height: 40,
+          width: 40
+        }} onClick={() => navigate(-1)}>{'<'}</button>
       </div>
+      <h2 style={{textAlign: 'center'}}>Пополнение</h2>
       <div className='deposit-content'>
-        <h2>Депозит</h2>
-        <p>Ваш баланс: {balance}₼</p>
-        <p>Введите сумму, на которую хотели бы пополнить:</p>
+        <p style={{ margin: 0, textAlign: 'center' }}>Введите сумму:</p>
+
         <input
-          value={todep.toString()}
-          onInput={(e) => { settodep(e.target.value) }}
+          value={todep}
+          onInput={(e) => {
+            const value = e.target.value;
+            // Убираем знак $ если он есть, чтобы сохранить только число
+            settodep(value.replace(/^\₼/, ""));
+          }}
+          onFocus={(e) => {
+            // Если пользователь удалит $, добавляем его обратно
+            if (!e.target.value.startsWith("₼")) {
+              e.target.value = "₼" + e.target.value;
+            }
+          }}
+          onChange={(e) => {
+            // Если пользователь пытается стереть $, восстанавливаем
+            if (!e.target.value.startsWith("₼")) {
+              e.target.value = "₼";
+            }
+          }}
         />
+
       </div>
-      <button className='b2 deposit-btn' onClick={async () => {
+
+      <div className='tips'>
+        <button onClick={() => { settodep(10) }}>10₼</button>
+        <button onClick={() => { settodep(25) }}>25₼</button>
+        <button onClick={() => { settodep(50) }}>50₼</button>
+        <button onClick={() => { settodep(100) }}>100₼</button>
+      </div>
+
+      <p style={{textAlign: 'center'}}>{balance}₼ → {balance + parseInt(todep)}₼</p>
+
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center'
+      }}>
+        <button className='b2 deposit-btn' onClick={async () => {
         const result = await databases.updateDocument(
           appwriteIds.databaseId, // databaseId
           appwriteIds.usersCollectionId, // collectionId
@@ -62,6 +102,7 @@ export default function Deposit() {
         navigate('/app')
         return result;
       }}>Пополнить</button>
+      </div>
     </div>
   );
 }

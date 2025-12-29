@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { databases, appwriteIds } from '../appwrite';
+import { databases, appwriteIds, ID } from '../appwrite';
 import { useAuth } from '../auth/AuthProvider';
 import {
   getGameById,
@@ -41,6 +41,8 @@ export default function Game() {
   const gameStatusRef = useRef(null);
   const jackpotProcessedRef = useRef(false);
   const prizeProcessedRef = useRef(false);
+  const historyProcessedRef = useRef(false);
+  const userTicketCountRef = useRef(0);
 
   // Загрузка игр из localStorage
   useEffect(() => {
@@ -49,12 +51,14 @@ export default function Game() {
     currentGames = updateGamesState(currentGames, false);
     setGames(currentGames);
 
-    // Сбросить флаги обработки при смене игры
-    jackpotProcessedRef.current = false;
-    prizeProcessedRef.current = false;
-    setJackpotWon(false);
-    setJackpotAmount(0);
-    setShowWinAnimation(false);
+      // Сбросить флаги обработки при смене игры
+      jackpotProcessedRef.current = false;
+      prizeProcessedRef.current = false;
+      historyProcessedRef.current = false;
+      userTicketCountRef.current = 0;
+      setJackpotWon(false);
+      setJackpotAmount(0);
+      setShowWinAnimation(false);
 
     const currentGame = getGameById(currentGames, id);
     if (currentGame) {
@@ -126,6 +130,9 @@ export default function Game() {
                   playLooseSound();
                 }
 
+                // Получить завершенную игру из массива
+                const finishedGame = getGameById(finished, id);
+
                 // Начислить выигрыш победителям и джекпот (если выиграли)
                 if (result.realWinners.length > 0 && result.realWinners.includes(user?.$id) && appwriteIds.usersCollectionId && !prizeProcessedRef.current) {
                   prizeProcessedRef.current = true;
@@ -157,8 +164,21 @@ export default function Game() {
                     })
                     .then(() => {
                       window.dispatchEvent(new CustomEvent('balance-changed'));
+                      // Сохранить историю игры (выигрыш)
+                      if (finishedGame) {
+                        saveGameHistory(finishedGame, true, prize + jackpotValue);
+                      }
                     })
                     .catch(err => console.error('Failed to credit prize', err));
+                } else {
+                  // Проверить, участвовал ли пользователь в игре
+                  if (finishedGame) {
+                    const playerInGame = finishedGame.players?.find(p => p.userId === user?.$id);
+                    if (playerInGame && !historyProcessedRef.current) {
+                      // Сохранить историю игры (проигрыш)
+                      saveGameHistory(finishedGame, false, 0);
+                    }
+                  }
                 }
 
                 return finished;
@@ -213,8 +233,20 @@ export default function Game() {
                     })
                     .then(() => {
                       window.dispatchEvent(new CustomEvent('balance-changed'));
+                      // Сохранить историю игры (выигрыш)
+                      saveGameHistory(currentGame, true, prize + jackpotValue);
                     })
                     .catch(err => console.error('Failed to credit prize', err));
+                } else {
+                  // Сохранить историю игры (выигрыш, но без приза)
+                  saveGameHistory(currentGame, true, 0);
+                }
+              } else {
+                // Проверить, участвовал ли пользователь в игре
+                const playerInGame = currentGame.players?.find(p => p.userId === user?.$id);
+                if (playerInGame && !historyProcessedRef.current) {
+                  // Сохранить историю игры (проигрыш)
+                  saveGameHistory(currentGame, false, 0);
                 }
               }
             }
@@ -377,6 +409,7 @@ export default function Game() {
 
       // Использовать текущие карточки пользователя (которые могли быть обновлены/удалены)
       const cards = userCards;
+      userTicketCountRef.current = actualTicketCount; // Сохранить количество билетов
 
       // Добавить игрока в игру
       const updatedGames = addPlayerToGame(games, id, user.$id, cards);
@@ -395,6 +428,119 @@ export default function Game() {
       setError(e?.message || 'Не удалось купить билеты');
     } finally {
       setLoading(false);
+    }
+  }
+
+  // Функция для сохранения истории игры
+  async function saveGameHistory(game, won, prize) {
+    if (!user?.$id || !appwriteIds.usersCollectionId || !appwriteIds.gameinfoCollectionId) {
+      console.log('saveGameHistory: Missing required IDs', { userId: user?.$id, usersCollectionId: appwriteIds.usersCollectionId, gameinfoCollectionId: appwriteIds.gameinfoCollectionId });
+      return;
+    }
+
+    if (historyProcessedRef.current) {
+      console.log('saveGameHistory: Already processed');
+      return;
+    }
+
+    // Проверить, участвовал ли пользователь в игре
+    const player = game.players?.find(p => p.userId === user.$id);
+    if (!player) {
+      console.log('saveGameHistory: User not in game', { gamePlayers: game.players, userId: user.$id });
+      return;
+    }
+
+    try {
+      historyProcessedRef.current = true;
+
+      // Получить количество билетов из игры или из ref
+      const tickets = player.cards?.length || userTicketCountRef.current || 1;
+      const dep = game.stake * tickets;
+      const wonAmount = won ? prize : 0;
+      const players = game.totalPlayers || 0;
+
+      console.log('saveGameHistory: Saving', { dep, won: wonAmount, tickets, players, gameId: game.id });
+
+      // Создать документ в gameinfo
+      const gameInfoId = ID.unique();
+      const gameInfoDoc = await databases.createDocument(
+        appwriteIds.databaseId,
+        appwriteIds.gameinfoCollectionId,
+        gameInfoId,
+        {
+          dep: dep,
+          won: wonAmount,
+          tickets: tickets,
+          players: players
+        }
+      );
+
+      console.log('saveGameHistory: Created gameinfo document', gameInfoId, gameInfoDoc);
+
+      // Получить текущий документ пользователя
+      const userDoc = await databases.getDocument(
+        appwriteIds.databaseId,
+        appwriteIds.usersCollectionId,
+        user.$id
+      );
+
+      console.log('saveGameHistory: Current user doc', { 
+        history: userDoc.history, 
+        historyType: typeof userDoc.history,
+        isArray: Array.isArray(userDoc.history)
+      });
+
+      // Получить текущий массив history или создать новый
+      // В Appwrite relationship может быть массивом строк (ID) или массивом объектов
+      let currentHistoryIds = [];
+      if (userDoc.history) {
+        if (Array.isArray(userDoc.history)) {
+          // Если это массив, извлечь ID
+          currentHistoryIds = userDoc.history.map(item => {
+            if (typeof item === 'string') return item;
+            if (item && typeof item === 'object' && item.$id) return item.$id;
+            return null;
+          }).filter(Boolean);
+        } else if (typeof userDoc.history === 'string') {
+          // Если это одна строка (ID)
+          currentHistoryIds = [userDoc.history];
+        } else if (userDoc.history && typeof userDoc.history === 'object' && userDoc.history.$id) {
+          // Если это один объект
+          currentHistoryIds = [userDoc.history.$id];
+        }
+      }
+      
+      // Добавить новый ID в массив history (relationship)
+      // В Appwrite для relationship массивов нужно передавать массив строк (ID)
+      const updatedHistory = [...currentHistoryIds, gameInfoId];
+
+      console.log('saveGameHistory: Updating user history', { 
+        currentLength: currentHistoryIds.length, 
+        newLength: updatedHistory.length,
+        currentHistoryIds,
+        updatedHistory,
+        gameInfoId
+      });
+
+      // Обновить документ пользователя с массивом ID для relationship
+      // В Appwrite для relationship нужно передавать массив ID (строк)
+      await databases.updateDocument(
+        appwriteIds.databaseId,
+        appwriteIds.usersCollectionId,
+        user.$id,
+        { history: updatedHistory }
+      );
+
+      console.log('saveGameHistory: Success - history updated with', updatedHistory.length, 'items');
+    } catch (err) {
+      console.error('Failed to save game history:', err);
+      console.error('Error details:', {
+        message: err.message,
+        code: err.code,
+        type: err.type,
+        response: err.response
+      });
+      historyProcessedRef.current = false; // Разрешить повторную попытку при ошибке
     }
   }
 

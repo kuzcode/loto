@@ -50,7 +50,7 @@ export default function Balance() {
                     width: 40
                 }} onClick={() => navigate(-1)}>{'<'}</button>
             </div>
-            <div className='deposit-content'>
+            <div>
                 <p style={{
                     fontSize: 20,
                     color: '#fff',
@@ -71,9 +71,9 @@ export default function Balance() {
                 display: 'flex',
                 maxWidth: 500,
                 width: '100%',
-                padding: '0 20px',
+                padding: 0,
                 justifyContent: 'center',
-                margin: '0 auto',
+                margin: '20px auto',
                 gap: 12
             }}>
                 <button

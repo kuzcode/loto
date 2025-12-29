@@ -229,19 +229,34 @@
 
 /* Deposit page */
 .deposit-page {
-  max-width: 500px;
   margin: 0 auto;
-  background: #fff;
+  background: #2a3143;
   min-height: 100vh;
-  color: #222;
+  color: #ffffff;
 }
 
 .deposit-header {
   padding: 12px 16px;
 }
 
+.deposit-page input {
+  background: #00000000;
+  border: none;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 25px;
+  text-align: center;
+  margin: 20px 0;
+  width: 100%;
+}
+
 .deposit-content {
-  padding: 0 16px 24px 16px;
+  padding: 16px;
+  border-radius: 20px;
+  background-color: #2c3548;
+  max-width: 400px;
+  width: calc(100% - 64px);
+  margin: 0 auto;
 }
 
 .deposit-btn {
@@ -252,6 +267,24 @@
   margin: 0 16px;
 }
 
+.tips {
+  display: flex;
+  justify-content: space-between;
+  max-width: 432px;
+  width: calc(100% - 32px);
+  margin: 12px auto 0 auto;
+  padding: 0;
+}
+
+.tips button {
+  background: #38445d;
+  border: none;
+  color: #888eaf;
+  padding: 10px;
+  width: 24%;
+  border-radius: 20px;
+}
+
 .profile {
   color: #fff;
   max-width: 500px;
@@ -259,22 +292,34 @@
   padding: 16px;
 }
 
-.logout {
+.profbtn {
   background: #2c3548;
   width: 100%;
-  padding: 6px 16px;
+  padding: 4px 16px;
   color: #fff;
   border: none;
   border-radius: 20px;
   margin: 0 auto;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.profbtn p {
+  margin-left: 12px;
+  color: #e5e8f8;
 }
 
 .avatar {
-  filter: invert(100%);
-  width: 24px;
-  height: 24px;
-  margin-right: 6px;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin: 0 auto 12px auto;
+}
+
+.invert {
+  filter: invert();
+  padding: 30px;
 }
 
 .flex {
@@ -285,11 +330,14 @@
 
 .name {
   margin: 0;
-  font-size: 28px;
+  font-size: 26px;
+  text-align: center;
 }
 
 .email {
-  margin: 12px 0 32px 0;
+  margin: 8px 0 12px 0;
+  color: #c8cce2;
+  text-align: center;
 }
 
 /* Chat */
@@ -761,4 +809,20 @@
 .ticon {
   width: 21.5px;
   height: 16px;
+}
+
+.played {
+  color: #2a3143;
+  background: #83a9f6;
+  border-radius: 50px;
+  padding: 4px 12px;
+  text-wrap: nowrap;
+  width:min-content;
+  margin: 0 auto 32px auto;
+}
+
+.played img {
+  filter: brightness(0.3);
+  margin: 0 4px 0 0;
+  transform: translate(0, 2px);
 }

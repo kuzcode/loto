@@ -8,6 +8,8 @@ import ProtectedApp from './ProtectedApp';
 import ProtectedLayout from './layouts/ProtectedLayout';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
+import EditProfile from './pages/EditProfile';
+import History from './pages/History';
 import Deposit from './pages/Deposit';
 import Balance from './pages/Balance';
 import Game from './pages/Game';
@@ -67,6 +69,8 @@ function App() {
               <Route path='/chat' element={<Chat />} />
               <Route path='/leaderboard' element={<Leaderboard />} />
               <Route path='/profile' element={<Profile />} />
+              <Route path='/profile/edit' element={<EditProfile />} />
+              <Route path='/history' element={<History />} />
             </Route>
             <Route path='/deposit' element={<Deposit />} />
             <Route path='/balance' element={<Balance />} />

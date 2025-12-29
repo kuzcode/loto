@@ -3,6 +3,7 @@ import { databases, appwriteIds, Query } from '../appwrite';
 import { useAuth } from '../auth/AuthProvider';
 import crown from '../icons/crown.png';
 import profile from '../icons/profile.png';
+import userimg from '../icons/user.png';
 
 export default function Leaderboard() {
   const { user } = useAuth();
@@ -34,6 +35,7 @@ export default function Leaderboard() {
           name: doc.name || 'Пользователь',
           balance: Number(doc.balance || 0),
           played: Number(doc.played || 0),
+          avatarUrl: doc.avatarUrl || '',
         }));
 
         setTopUsers(users);
@@ -58,6 +60,7 @@ export default function Leaderboard() {
                 name: userDoc.name || 'Пользователь',
                 balance: balance,
                 played: Number(userDoc.played || 0),
+                avatarUrl: userDoc.avatarUrl || '',
               });
             }
           } catch (err) {
@@ -156,14 +159,14 @@ export default function Leaderboard() {
                     }}
                   >
                     <img
-                      src={profile}
+                      src={userItem.avatarUrl || userimg}
                       alt={userItem.name}
                       style={{
-                        width: '70%',
-                        height: '70%',
+                        width: '100%',
+                        height: '100%',
                         objectFit: 'cover',
-                        padding: 50
                       }}
+                      className={`${!userItem.avatarUrl && 'invert'}`}
                     />
                   </div>
                 </div>

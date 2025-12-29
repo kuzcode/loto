@@ -6,11 +6,18 @@ import userimg from '../icons/user.png';
 import { useEffect, useState } from 'react';
 import { databases, appwriteIds } from '../appwrite';
 
+import logout2 from '../icons/logout.png';
+import wallet from '../icons/wallet.png';
+import history from '../icons/history.png';
+import edit from '../icons/edit.png';
+import play from '../icons/play.png';
+
 export default function Profile() {
   const { user, setUser } = useAuth();
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [played, setPlayed] = useState(user?.played || 0);
+  const [avatarUrl, setAvatarUrl] = useState('');
 
   const navigate = useNavigate();
 
@@ -25,6 +32,7 @@ export default function Profile() {
         setName(userDoc.name || '');
         setEmail(userDoc.email || '');
         setPlayed(userDoc.played || 0);
+        setAvatarUrl(userDoc.avatarUrl || '');
       } catch (error) {
         console.error('Error fetching user document:', error);
       }
@@ -46,14 +54,45 @@ export default function Profile() {
 
   return (
     <div className='profile'>
-      <div className='flex'>
-        <img src={userimg} className='avatar' alt='user' />
-        <h2 className='name'>{name}</h2>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center'
+      }}>
+        {avatarUrl ? (
+        <img src={avatarUrl} className='avatar' alt='user' />
+      ) : (
+        <img src={userimg} className='avatar invert' alt='user' />
+      )}
       </div>
+
+      <h2 className='name'>{name}</h2>
       <p className='email'>{email}</p>
-      <p className='email'>Игр сыграно: {played}</p>
-      <button className='logout' onClick={logout}>
-        <p>Выйти из аккаунта</p>
+      <p className='played'><img src={play} width={18} height={17} /> {played} игр сыграно</p>
+
+      <div style={{
+        background: '#2c3548',
+        borderRadius: 20,
+        marginBottom: 12
+      }}>
+        <button className='profbtn' onClick={() => navigate('/balance')}>
+          <img src={wallet} width={18} height={18} />
+          <p>Баланс</p>
+        </button>
+        <div style={{ width: 'calc(100% - 32px)', height: 1, background: '#38445d', margin: '1px 16px' }}></div>
+        <button className='profbtn' onClick={() => navigate('/history')}>
+          <img src={history} width={18} height={18} />
+          <p>История игр</p>
+        </button>
+        <div style={{ width: 'calc(100% - 32px)', height: 1, background: '#38445d', margin: '1px 16px' }}></div>
+        <button className='profbtn' onClick={() => navigate('/profile/edit')}>
+          <img src={edit} width={18} height={18} />
+          <p>Изменить профиль</p>
+        </button>
+      </div>
+
+      <button className='profbtn' onClick={logout}>
+        <img src={logout2} width={18} height={18} />
+        <p style={{ color: '#eb5656' }}>Выйти из аккаунта</p>
       </button>
     </div>
   );
