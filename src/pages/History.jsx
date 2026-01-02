@@ -7,6 +7,7 @@ export default function History() {
   const [history, setHistory] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
     async function loadHistory() {
       if (!user?.$id || !appwriteIds.usersCollectionId || !appwriteIds.gameinfoCollectionId) {
@@ -16,82 +17,18 @@ export default function History() {
 
       setLoading(true);
       try {
-        console.log('History: Loading user document...', user.$id);
-
-        // Получить документ пользователя
-        const userDoc = await databases.getDocument(
+        const result = await databases.listDocuments(
           appwriteIds.databaseId,
-          'users',
-          user.$id
+          appwriteIds.gameinfoCollectionId, // здесь должен быть appwriteIds.gameinfoCollectionId, а не 'gameinfo'
+          [
+            Query.equal('user', user.$id)
+          ]
         );
-
-        console.log(userDoc);
-
-        const historyRaw = userDoc.history || [];
-
-        // Обработать relationship - может быть массивом строк (ID) или массивом объектов
-        let historyIds = [];
-        if (Array.isArray(historyRaw)) {
-          historyIds = historyRaw.map(item => {
-            if (typeof item === 'string') {
-              return item;
-            }
-            if (item && typeof item === 'object' && item.$id) {
-              return item.$id;
-            }
-            return null;
-          }).filter(Boolean);
-        } else if (historyRaw) {
-          if (typeof historyRaw === 'string') {
-            historyIds = [historyRaw];
-          } else if (historyRaw && typeof historyRaw === 'object' && historyRaw.$id) {
-            historyIds = [historyRaw.$id];
-          }
-        }
-
-        console.log('History: Extracted IDs', { historyIds, count: historyIds.length });
-
-        if (historyIds.length === 0) {
-          console.log('History: No history items found');
-          setHistory([]);
-          setLoading(false);
-          return;
-        }
-
-        // Загрузить все документы истории
-        console.log('History: Loading', historyIds.length, 'history items...');
-        const historyPromises = historyIds.map(id =>
-          databases.getDocument(
-            appwriteIds.databaseId,
-            appwriteIds.gameinfoCollectionId,
-            id
-          ).catch(err => {
-            console.error(`History: Failed to load history item ${id}:`, err);
-            return null;
-          })
-        );
-
-        const historyItems = await Promise.all(historyPromises);
-
-        console.log('History: Loaded items', {
-          total: historyItems.length,
-          valid: historyItems.filter(item => item !== null).length
-        });
-
-        // Отфильтровать null и отсортировать по дате (новые сначала)
-        const validHistory = historyItems
-          .filter(item => item !== null)
-          .sort((a, b) => {
-            const dateA = new Date(a.$createdAt || 0);
-            const dateB = new Date(b.$createdAt || 0);
-            return dateB - dateA;
-          });
-
-        console.log('History: Final history items', validHistory.length);
-        setHistory(validHistory);
+        // Обработка result, например:
+        setHistory(result.documents);
       } catch (error) {
-        console.error('History: Error loading history:', error);
-        setHistory([]);
+        // Обработка ошибок
+        console.error(error);
       } finally {
         setLoading(false);
       }
@@ -101,6 +38,7 @@ export default function History() {
       loadHistory();
     }
   }, [user]);
+
 
   // Функция для форматирования даты
   function formatDate(dateString) {
@@ -122,7 +60,7 @@ export default function History() {
   if (loading) {
     return (
       <div className='App'>
-        <p className='title'>История игр</p>
+        <p className='titlem'>История игр</p>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
           <div className='spinner'></div>
         </div>
@@ -132,7 +70,7 @@ export default function History() {
 
   return (
     <div className='App'>
-      <p className='title'>История игр</p>
+      <p className='titlem'>История игр</p>
 
       <div style={{
         maxWidth: 500,
@@ -158,7 +96,7 @@ export default function History() {
                 key={item.$id || index}
                 style={{
                   backgroundColor: '#2c3548',
-                  borderRadius: '12px',
+                  borderRadius: '20px',
                   padding: '16px 20px',
                 }}
               >

@@ -989,7 +989,6 @@ export default function Game() {
                       boxShadow: '-4px 4px 12px 0 rgba(0, 0, 0, 0.24)',
                       color: '#c8cce2',
                       opacity: userCards.length <= 1 ? 0.5 : 1,
-                      color: '#fff',
                       fontSize: '13px',
                       fontWeight: 'bold',
                       cursor: userCards.length <= 1 ? 'not-allowed' : 'pointer',

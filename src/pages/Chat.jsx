@@ -151,7 +151,7 @@ export default function Chat() {
 
   return (
     <div className='App'>
-      <p className='title'>Чат</p>
+      <p className='titlem'>Чат</p>
       <div className='chat'>
         <div className='chat-list'>
           {items.map((d) => {

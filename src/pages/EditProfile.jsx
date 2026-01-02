@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { account, databases, storage, appwriteIds, ID } from '../appwrite';
 import { useAuth } from '../auth/AuthProvider';
 import profile from '../icons/profile.png';
+import photo from '../icons/photo.png';
 
 export default function EditProfile() {
   const { user, setUser } = useAuth();
@@ -193,10 +194,10 @@ export default function EditProfile() {
 
   return (
     <div className='App'>
-      <p className='title'>Редактирование профиля</p>
+      <p className='titlem'>Редактирование профиля</p>
       
       <div style={{
-        maxWidth: 500,
+        maxWidth: 456,
         margin: '20px auto',
         padding: '0 16px',
       }}>
@@ -206,12 +207,11 @@ export default function EditProfile() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: '30px',
           }}>
             <div
               style={{
-                width: '120px',
-                height: '120px',
+                width: '100px',
+                height: '100px',
                 borderRadius: '50%',
                 backgroundColor: '#2c3548',
                 border: '3px solid #83a9f6',
@@ -258,17 +258,17 @@ export default function EditProfile() {
               type="button"
               onClick={() => fileInputRef.current?.click()}
               style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
+                width: 40,
+                height: 40,
+                borderRadius: '50px',
                 border: 'none',
-                backgroundColor: '#83a9f6',
-                color: '#fff',
-                fontSize: '14px',
-                fontWeight: 600,
+                backgroundColor: '#2a3143',
                 cursor: 'pointer',
+                boxShadow: '0 0 20px #00000057',
+                transform: 'translate(30px, -50px)'
               }}
             >
-              Изменить аватар
+              <img src={photo} width={18} height={17} />
             </button>
           </div>
 

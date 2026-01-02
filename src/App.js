@@ -10,6 +10,7 @@ import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import History from './pages/History';
+import Privacy from './pages/Privacy';
 import Deposit from './pages/Deposit';
 import Balance from './pages/Balance';
 import Game from './pages/Game';
@@ -61,6 +62,7 @@ function App() {
         <Routes>
           <Route path='/' element={<Landing />} />
           <Route path='/login' element={<Login />} />
+          <Route path='/privacy' element={<Privacy />} />
           <Route path='/register' element={<Register />} />
           <Route element={<ProtectedRoute />}>
             <Route element={<ProtectedLayout />}>
