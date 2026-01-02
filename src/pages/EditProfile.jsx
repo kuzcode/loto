@@ -193,7 +193,7 @@ export default function EditProfile() {
   };
 
   return (
-    <div className='App'>
+    <div className='App with-bg'>
       <p className='titlem'>Редактирование профиля</p>
       
       <div style={{

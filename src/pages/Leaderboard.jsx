@@ -86,7 +86,7 @@ export default function Leaderboard() {
 
   if (loading) {
     return (
-      <div className='App'>
+      <div className='App with-bg'>
         <p className='title'>Лидерборд</p>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
           <div className='spinner'></div>
@@ -105,9 +105,10 @@ export default function Leaderboard() {
   ];
 
   return (
-    <div className='App'>
+    <div className='App with-bg'>
       <p className='titlem'>Лидерборд</p>
 
+      <div className="topthree">
       {/* Топ 3 игрока на пьедестале */}
       {topThree.length > 0 && (
         <div style={{
@@ -242,6 +243,7 @@ export default function Leaderboard() {
           })}
         </div>
       )}
+      </div>
 
       {/* Шапка таблицы для остальных */}
       {otherUsers.length > 0 && (
@@ -336,6 +338,10 @@ export default function Leaderboard() {
           </div>
         </div>
       )}
+
+      <div style={{
+          marginBottom: 150
+        }}></div>
     </div>
   );
 }

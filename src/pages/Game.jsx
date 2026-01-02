@@ -51,14 +51,14 @@ export default function Game() {
     currentGames = updateGamesState(currentGames, false);
     setGames(currentGames);
 
-      // Сбросить флаги обработки при смене игры
-      jackpotProcessedRef.current = false;
-      prizeProcessedRef.current = false;
-      historyProcessedRef.current = false;
-      userTicketCountRef.current = 0;
-      setJackpotWon(false);
-      setJackpotAmount(0);
-      setShowWinAnimation(false);
+    // Сбросить флаги обработки при смене игры
+    jackpotProcessedRef.current = false;
+    prizeProcessedRef.current = false;
+    historyProcessedRef.current = false;
+    userTicketCountRef.current = 0;
+    setJackpotWon(false);
+    setJackpotAmount(0);
+    setShowWinAnimation(false);
 
     const currentGame = getGameById(currentGames, id);
     if (currentGame) {
@@ -484,8 +484,8 @@ export default function Game() {
         user.$id
       );
 
-      console.log('saveGameHistory: Current user doc', { 
-        history: userDoc.history, 
+      console.log('saveGameHistory: Current user doc', {
+        history: userDoc.history,
         historyType: typeof userDoc.history,
         isArray: Array.isArray(userDoc.history)
       });
@@ -509,13 +509,13 @@ export default function Game() {
           currentHistoryIds = [userDoc.history.$id];
         }
       }
-      
+
       // Добавить новый ID в массив history (relationship)
       // В Appwrite для relationship массивов нужно передавать массив строк (ID)
       const updatedHistory = [...currentHistoryIds, gameInfoId];
 
-      console.log('saveGameHistory: Updating user history', { 
-        currentLength: currentHistoryIds.length, 
+      console.log('saveGameHistory: Updating user history', {
+        currentLength: currentHistoryIds.length,
         newLength: updatedHistory.length,
         currentHistoryIds,
         updatedHistory,
@@ -615,7 +615,7 @@ export default function Game() {
 
   if (!game) {
     return (
-      <div className='App with-bar'>
+      <div className='App with-bar with-bg'>
         <div className='auth-card'>
           <p>Загрузка игры...</p>
         </div>
@@ -624,7 +624,7 @@ export default function Game() {
   }
 
   return (
-    <div className='App'>
+    <div className='App with-bg'>
       <div className='playingarea'>
         <h2>Игра {game.stake}₼</h2>
         {error ? <p className='auth-error'>{error}</p> : null}
@@ -647,48 +647,49 @@ export default function Game() {
 
         {/* Окошки с числами (только во время игры) */}
         {game.status === 'running' && (
-          <div className='number-windows' style={{
+          <div style={{
             display: 'flex',
-            gap: '8px',
-            marginBottom: '20px',
-            justifyContent: 'center',
-            alignItems: 'center',
+            flexDirection: 'column'
           }}>
             <div className="lines">
               <div className="r"></div>
               <div className="r"></div>
             </div>
 
-            {last5Numbers.map((num, idx) => {
-              const isLatest = idx === 0; // Первое окошко (самое новое число) - самое большое
-              return (
-                <div
-                  key={idx}
-                  className='barrel'
-                  style={{
-                    width: isLatest ? 'calc(1vw + 75px)' : 'calc(1vw + 60px)',
-                    height: isLatest ? 'calc(1vw + 75px)' : 'calc(1vw + 60px)',
-                    fontSize: isLatest ? 'calc(0.8vw + 25px)' : 'calc(0.8vw + 18px)',
-                  }}
-                >
-                  <div className="l1">
-                    <div className="l2">
-                      <div className="l3">
-                        <div className="l4">
-                          <p
-                            style={{
-                              marginTop: isLatest ? '30px' : '18px',
-                            }}
-                          >
-                            {num !== null ? num : ''}
-                          </p>
+            <div className='barrels' style={{
+              display: 'flex',
+              gap: '8px',
+              marginBottom: '20px',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+              {last5Numbers.map((num, idx) => {
+                const isLatest = idx === 0; // Первое окошко (самое новое число) - самое большое
+                return (
+                  <div
+                    key={idx}
+                    className='barrel'
+                    style={{
+                      width: isLatest ? 'calc(1vw + 75px)' : 'calc(1vw + 60px)',
+                      height: isLatest ? 'calc(1vw + 75px)' : 'calc(1vw + 60px)',
+                      fontSize: isLatest ? 'calc(0.8vw + 25px)' : 'calc(0.8vw + 18px)',
+                    }}
+                  >
+                    <div className="l1">
+                      <div className="l2">
+                        <div className="l3">
+                          <div className="l4">
+                            <p>
+                              {num !== null ? num : ''}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -1017,13 +1018,12 @@ export default function Game() {
                       return (
                         <div
                           key={colIdx}
+                          className='yacheika'
                           style={{
-                            padding: '6px',
                             textAlign: 'center',
                             backgroundColor: hasNumber ? '#c3d1e5' : '#99a8c2',
                             color: '#2a3143',
                             borderRadius: '10px',
-                            minHeight: '40px',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
@@ -1051,7 +1051,6 @@ export default function Game() {
                             style={{
                               position: 'relative',
                               fontWeight: 700,
-                              fontSize: 20,
                               zIndex: 1,
                               mixBlendMode: marked ? 'overlay' : 'normal',
                             }}
@@ -1107,7 +1106,7 @@ export default function Game() {
                   justifyContent: 'center',
                 }}>
                   {// <img src={ticket} alt="билет" style={{ width: '20px', height: '20px' }} />
-}
+                  }
                 </div>
                 <div style={{ color: '#fff', fontSize: '16px', fontWeight: 500 }}>
                   {getGameTitle(game.stake)} {game.stake.toFixed(2)}₼
@@ -1259,6 +1258,9 @@ export default function Game() {
           </div>
         )}
       </div>
-    </div >
+      <div style={{
+        marginBottom: 150
+      }}></div>
+    </div>
   );
 }

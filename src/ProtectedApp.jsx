@@ -68,7 +68,7 @@ export default function ProtectedApp() {
   }
 
   return (
-    <div className='App'>
+    <div className='App with-bg'>
       <p className='titlem'>Игры</p>
       <div className='games'>
         {games.map((game) => (

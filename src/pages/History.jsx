@@ -59,7 +59,7 @@ export default function History() {
 
   if (loading) {
     return (
-      <div className='App'>
+      <div className='App with-bg'>
         <p className='titlem'>История игр</p>
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px' }}>
           <div className='spinner'></div>
@@ -69,7 +69,7 @@ export default function History() {
   }
 
   return (
-    <div className='App'>
+    <div className='App with-bg'>
       <p className='titlem'>История игр</p>
 
       <div style={{

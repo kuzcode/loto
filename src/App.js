@@ -26,7 +26,7 @@ function Landing() {
   }
 
   return (
-    <div className="App" style={{
+    <div className="App with-bg" style={{
       display: 'flex',
       flexDirection: 'column',
       justifyContent: 'space-between',

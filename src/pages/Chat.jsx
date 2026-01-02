@@ -150,7 +150,7 @@ export default function Chat() {
   }
 
   return (
-    <div className='App'>
+    <div className='App with-bg'>
       <p className='titlem'>Чат</p>
       <div className='chat'>
         <div className='chat-list'>
@@ -238,6 +238,10 @@ export default function Chat() {
           </button>
         </form>
       </div>
+
+      <div style={{
+          marginBottom: 150
+        }}></div>
     </div>
   );
 }

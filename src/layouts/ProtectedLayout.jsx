@@ -33,7 +33,8 @@ export default function ProtectedLayout() {
   const shouldShowReturnButton = activeGame && (!isOnGamePage || currentGameId !== activeGame.id);
 
   return (
-    <div className='App with-bar'>
+    <div className='App with-bg'>
+    <div className='with-bar'>
       <Header />
       {shouldShowReturnButton && (
         <div style={{
@@ -73,6 +74,7 @@ export default function ProtectedLayout() {
         <Outlet />
       </div>
       <BottomBar />
+    </div>
     </div>
   );
 }
