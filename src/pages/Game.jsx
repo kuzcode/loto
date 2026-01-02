@@ -284,12 +284,36 @@ export default function Game() {
     }
   }, [ticketCount, isInGame, userCards.length]);
 
+  // Автоматический редирект через 5 секунд после окончания игры
+  useEffect(() => {
+    if (gameFinished) {
+      const redirectTimer = setTimeout(() => {
+        playClickSound();
+        navigate('/app', { replace: true });
+      }, 5000);
+
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [gameFinished, navigate]);
+
   // Убрали автоматический редирект - пользователь сам решает, что делать после игры
 
   // Инициализация состояния звука
   useEffect(() => {
     setSoundOn(isSoundEnabled());
   }, []);
+
+  // Автоматический редирект через 5 секунд после окончания игры
+  useEffect(() => {
+    if (gameFinished) {
+      const redirectTimer = setTimeout(() => {
+        playClickSound();
+        navigate('/app', { replace: true });
+      }, 5000);
+
+      return () => clearTimeout(redirectTimer);
+    }
+  }, [gameFinished, navigate]);
 
   // Инициализация аудио
   useEffect(() => {
@@ -862,14 +886,13 @@ export default function Game() {
               padding: '40px 60px',
               borderRadius: '20px',
               textAlign: 'center',
-              border: '5px solid #fff',
             }}
           >
             <p style={{ margin: 0, color: '#fff', fontSize: '36px', fontWeight: 'bold' }}>
-              🎉 ПОЗДРАВЛЯЕМ! 🎉
+              🎉 Поздравляем! 🎉
             </p>
             <p style={{ margin: '10px 0 0 0', color: '#fff', fontSize: '24px', fontWeight: 'bold' }}>
-              ВЫ ВЫИГРАЛИ!
+              Вы выиграли
             </p>
           </div>
         )}

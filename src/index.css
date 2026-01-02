@@ -20,15 +20,9 @@ body {
 
 @keyframes winCelebration {
   0% {
-    transform: scale(0.5) rotate(-10deg);
     opacity: 0;
   }
-  50% {
-    transform: scale(1.2) rotate(10deg);
-    opacity: 1;
-  }
   100% {
-    transform: scale(1) rotate(0deg);
     opacity: 1;
   }
 }
@@ -43,7 +37,7 @@ body {
 }
 
 .win-animation {
-  animation: winCelebration 0.8s ease-out, winPulse 2s ease-in-out infinite;
+  animation: winCelebration 0.3s ease-out, winPulse 2s ease-in-out infinite;
 }
 
 /* Spinner - полузаполненная окружность, вращающаяся вокруг своей оси */
