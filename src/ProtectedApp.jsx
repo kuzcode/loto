@@ -69,7 +69,6 @@ export default function ProtectedApp() {
                 if (game.status === 'finished') return;
                 const activeGame = getActiveGameForUser(games, user?.$id);
                 if (activeGame && activeGame.id !== game.id) {
-
                   alert('Вы уже участвуете в другой игре. Завершите текущую игру перед началом новой.');
                   return;
                 } playClickSound();
@@ -78,7 +77,7 @@ export default function ProtectedApp() {
             >
               <div className='row'>
                 <div className="col1">
-                  <h3 style={{ marginTop: 0, fontWeight: 400, fontSize: 15 }}>{info[games.indexOf(game)].title}<span className='stake'> {game.stake}₼</span></h3>
+                  <h3 style={{ marginTop: 0, fontWeight: 400, fontSize: 15, display: 'flex', alignItems: 'center' }}>{info[games.indexOf(game)].title}<span className='stake' style={{margin: '-5px 0 0 4px'}}> {game.stake}₼</span></h3>
                   <div className="col">
                     <p className='ingame'>В ИГРЕ</p>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -140,12 +139,13 @@ export default function ProtectedApp() {
                     </p>
                   </div>
                 </div>
-              </div>          <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                 <div className="prev">
-                  <p style={{ margin: 0 }}>Предыдущая игра</p>
+                  <p style={{ margin: '6px 0 0 0' }}>Предыдущая игра</p>
                   <div className="line"></div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '6px' }}>
                   <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                     {(() => {
                       let lastNumbers = [];
