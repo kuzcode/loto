@@ -578,7 +578,7 @@ export default function Game() {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   padding: 0,
-                  boxShadow: '0 0 12px #00000030'
+                  boxShadow: '0 0 12px #00000020'
                 }}
                 title={soundOn ? 'Выключить звук' : 'Включить звук'}
               > {/* 2.1kb */}
