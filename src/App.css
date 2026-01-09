@@ -393,7 +393,7 @@ a.profbtn {
 }
 .game-card {
   border-radius: 32px;
-  padding: 16px;
+  padding: 16px 22px;
   color: #2a3143;
   max-width: 424px;
   margin: 12px auto;

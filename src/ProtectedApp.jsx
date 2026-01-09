@@ -142,7 +142,7 @@ export default function ProtectedApp() {
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', width: '100%' }}>
                 <div className="prev">
-                  <p style={{ margin: '6px 0 0 0' }}>Предыдущая игра</p>
+                  <p style={{ margin: '6px 0 0 0', fontSize: 15 }}>Предыдущая игра</p>
                   <div className="line"></div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', marginTop: '6px' }}>
