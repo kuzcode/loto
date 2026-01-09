@@ -514,8 +514,14 @@ export default function Game() {
                   <img src={crown} alt="приз" style={{ width: '20px', height: '20px', filter: 'brightness(20)' }} />
                 </div>
                 <div>
-                  <div style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', lineHeight: '1.2' }}>
-                    {game.jackpot ? game.jackpot.toFixed(2) : '0.00'}₼
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}>
+                    <p style={{margin: 0, fontSize: 14, color: '#986ff2'}}>ПРИЗ</p>
+                    <div style={{ color: '#fff', fontSize: '19px', fontWeight: 'bold', lineHeight: '1.2' }}>
+                      {game.jackpot ? game.jackpot.toFixed(2) : '0.00'}₼
+                    </div>
                   </div>
                 </div>
               </div>
@@ -536,7 +542,7 @@ export default function Game() {
                   <img src={person} alt="игроки" style={{ width: '17px', height: '21px', filter: 'brightness(20)' }} />
                 </div>
                 <div>
-                  <div style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', lineHeight: '1.2' }}>
+                  <div style={{ color: '#fff', fontSize: '19px', marginTop: 4, lineHeight: '1.2' }}>
                     {game.totalPlayers || 0}
                   </div>
                 </div>
@@ -593,7 +599,7 @@ export default function Game() {
                           color: '#fff',
                           fontSize: '13px',
                           display: 'inline-block',
-                          margin: '0 5px',
+                          margin: '2px 5px',
                         }}
                       >
                         {count} {count === 1 ? 'карточка' : count < 5 ? 'карточки' : 'карточек'} ожидает {remaining} {remaining === 1 ? 'номер' : remaining < 5 ? 'номера' : 'номеров'}
@@ -819,6 +825,7 @@ export default function Game() {
                               fontWeight: 700,
                               zIndex: 1,
                               mixBlendMode: marked ? 'overlay' : 'normal',
+                              marginTop: 4
                             }}
                           >
                             {num ?? ''}

@@ -125,7 +125,7 @@ export default function Profile() {
         }}>
           <a className='profbtn' href='https://t.me/catbad'>
             <img src={chat} width={18} height={18} style={{filter: 'brightness(1.52'}} />
-            <p>Нужна помощь? Напишите нам</p>
+            <p style={{fontSize: 16}}>Нужна помощь? Напишите нам</p>
           </a>
           <div style={{ width: 'calc(100% - 32px)', height: 1, background: '#38445d', margin: '1px 16px' }}></div>
           <button className='profbtn' onClick={() => navigate('/privacy')}>
