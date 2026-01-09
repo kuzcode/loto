@@ -19,16 +19,14 @@ export default function History() {
       try {
         const result = await databases.listDocuments(
           appwriteIds.databaseId,
-          appwriteIds.gameinfoCollectionId, // здесь должен быть appwriteIds.gameinfoCollectionId, а не 'gameinfo'
+          appwriteIds.gameinfoCollectionId, 
           [
             Query.equal('user', user.$id)
           ]
         );
-        // Обработка result, например:
-        setHistory(result.documents);
+       setHistory(result.documents);
       } catch (error) {
-        // Обработка ошибок
-        console.error(error);
+       console.error(error);
       } finally {
         setLoading(false);
       }
@@ -40,7 +38,7 @@ export default function History() {
   }, [user]);
 
 
-  // Функция для форматирования даты
+  
   function formatDate(dateString) {
     if (!dateString) return 'Неизвестно';
     try {
@@ -100,7 +98,6 @@ export default function History() {
                   padding: '16px 20px',
                 }}
               >
-                {/* Дата */}
                 <div style={{
                   color: '#888eaf',
                   fontSize: '12px',
@@ -108,8 +105,6 @@ export default function History() {
                 }}>
                   {formatDate(item.$createdAt)}
                 </div>
-
-                {/* Основная информация */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
@@ -137,8 +132,6 @@ export default function History() {
                     </div>
                   </div>
                 </div>
-
-                {/* Дополнительная информация */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',

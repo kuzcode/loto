@@ -8,69 +8,45 @@ import photo from '../icons/photo.png';
 export default function EditProfile() {
   const { user, setUser } = useAuth();
   const navigate = useNavigate();
-  const fileInputRef = useRef(null);
-
-  const [name, setName] = useState('');
+  const fileInputRef = useRef(null); const [name, setName] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
-
-  useEffect(() => {
+  const [success, setSuccess] = useState(''); useEffect(() => {
     async function loadUserData() {
-      if (!user?.$id || !appwriteIds.usersCollectionId) return;
-
-      try {
-        // Загрузить данные пользователя из базы
+      if (!user?.$id || !appwriteIds.usersCollectionId) return; try {
         const userDoc = await databases.getDocument(
           appwriteIds.databaseId,
           appwriteIds.usersCollectionId,
           user.$id
-        );
-        
-        setName(userDoc.name || user.name || '');
+        ); setName(userDoc.name || user.name || '');
         setAvatarUrl(userDoc.avatarUrl || '');
       } catch (error) {
         console.error('Error loading user data:', error);
         setName(user?.name || '');
       }
-    }
-
-    if (user) {
+    } if (user) {
       loadUserData();
     }
-  }, [user]);
-
-  const handleAvatarChange = async (e) => {
+  }, [user]); const handleAvatarChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Проверка типа файла
     if (!file.type.startsWith('image/')) {
       setError('Пожалуйста, выберите изображение');
       return;
     }
-
-    // Проверка размера файла (макс 5MB)
     if (file.size > 5 * 1024 * 1024) {
       setError('Размер файла не должен превышать 5MB');
       return;
-    }
-
-    if (!appwriteIds.avatarsBucketId) {
+    } if (!appwriteIds.avatarsBucketId) {
       setError('Не настроен bucket для аватаров');
       return;
-    }
-
-    setLoading(true);
+    } setLoading(true);
     setError('');
-    setSuccess('');
-
-    try {
-      // Получить текущий avatarUrl из БД перед удалением
+    setSuccess(''); try {
       let oldAvatarUrl = avatarUrl;
       if (!oldAvatarUrl && user?.$id && appwriteIds.usersCollectionId) {
         try {
@@ -84,8 +60,6 @@ export default function EditProfile() {
           console.error('Error loading user doc for avatar:', err);
         }
       }
-
-      // Удалить старое изображение, если оно есть
       if (oldAvatarUrl && oldAvatarUrl.includes('/storage')) {
         try {
           const urlParts = oldAvatarUrl.split('/');
@@ -96,57 +70,40 @@ export default function EditProfile() {
           }
         } catch (err) {
           console.error('Error deleting old avatar:', err);
-          // Продолжаем, даже если не удалось удалить старое изображение
         }
       }
-
-      // Загрузить новое изображение
       const fileId = ID.unique();
       await storage.createFile(
         appwriteIds.avatarsBucketId,
         fileId,
         file
       );
-
-      // Получить URL для предпросмотра (публичный доступ)
       const fileUrl = storage.getFileView(
         appwriteIds.avatarsBucketId,
         fileId
       );
-
-      // Обновить в базе данных
       await databases.updateDocument(
         appwriteIds.databaseId,
         appwriteIds.usersCollectionId,
         user.$id,
         { avatarUrl: fileUrl }
-      );
-
-      setAvatarUrl(fileUrl);
+      ); setAvatarUrl(fileUrl);
       setSuccess('Аватар успешно обновлен');
     } catch (err) {
       setError(err?.message || 'Ошибка загрузки аватара');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSubmit = async (e) => {
+  }; const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
-    setLoading(true);
-
-    try {
+    setLoading(true); try {
       let hasUpdates = false;
-
-      // Обновить имя в Appwrite Account
       if (name && name !== user?.name) {
         await account.updateName(name);
         hasUpdates = true;
       }
-
-      // Обновить имя в базе данных
       if (name && appwriteIds.usersCollectionId) {
         await databases.updateDocument(
           appwriteIds.databaseId,
@@ -156,31 +113,18 @@ export default function EditProfile() {
         );
         hasUpdates = true;
       }
-
-      // Обновить пароль, если указан
       if (newPassword) {
         if (newPassword.length < 8) {
           throw new Error('Пароль должен содержать минимум 8 символов');
-        }
-
-        if (newPassword !== confirmPassword) {
+        } if (newPassword !== confirmPassword) {
           throw new Error('Пароли не совпадают');
-        }
-
-        if (!currentPassword) {
+        } if (!currentPassword) {
           throw new Error('Введите текущий пароль для смены');
-        }
-
-        await account.updatePassword(newPassword, currentPassword);
-        // Очистить поля пароля после успешного обновления
-        setCurrentPassword('');
+        } await account.updatePassword(newPassword, currentPassword); setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
         hasUpdates = true;
-      }
-
-      if (hasUpdates) {
-        // Обновить данные пользователя в контексте
+      } if (hasUpdates) {
         const updatedUser = await account.get();
         setUser(updatedUser);
         setSuccess('Профиль успешно обновлен');
@@ -190,19 +134,14 @@ export default function EditProfile() {
     } finally {
       setLoading(false);
     }
-  };
-
-  return (
+  }; return (
     <div className='App with-bg'>
-      <p className='titlem'>Редактирование профиля</p>
-      
-      <div style={{
+      <p className='titlem'>Редактирование профиля</p>    <div style={{
         maxWidth: 456,
         margin: '20px auto',
         padding: '0 16px',
       }}>
         <form onSubmit={handleSubmit}>
-          {/* Аватар */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -271,8 +210,6 @@ export default function EditProfile() {
               <img src={photo} width={18} height={17} />
             </button>
           </div>
-
-          {/* Имя */}
           <div style={{ marginBottom: '20px' }}>
             <label style={{
               display: 'block',
@@ -301,8 +238,6 @@ export default function EditProfile() {
               placeholder="Введите имя"
             />
           </div>
-
-          {/* Пароль */}
           <div style={{ marginBottom: '20px' }}>
             <label style={{
               display: 'block',
@@ -373,8 +308,6 @@ export default function EditProfile() {
               </>
             )}
           </div>
-
-          {/* Сообщения об ошибках и успехе */}
           {error && (
             <div style={{
               backgroundColor: '#ff5733',
@@ -386,9 +319,7 @@ export default function EditProfile() {
             }}>
               {error}
             </div>
-          )}
-
-          {success && (
+          )}        {success && (
             <div style={{
               backgroundColor: '#4caf50',
               color: '#fff',
@@ -400,8 +331,6 @@ export default function EditProfile() {
               {success}
             </div>
           )}
-
-          {/* Кнопки */}
           <div style={{
             display: 'flex',
             gap: '12px',

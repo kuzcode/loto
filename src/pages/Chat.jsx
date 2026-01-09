@@ -14,7 +14,7 @@ function formatRelative(dateStr) {
   if (min < 60) return `${min} мин. назад`;
   if (hour < 24) return `${hour} ч. назад`;
   if (day < 7) return `${day} дн. назад`;
-  const months = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+  const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
   return `${date.getDate()} ${months[date.getMonth()]} ${date.getFullYear()}`;
 }
 
@@ -26,16 +26,10 @@ export default function Chat() {
   const [cursorAfter, setCursorAfter] = useState(null);
   const [message, setMessage] = useState('');
   const [sending, setSending] = useState(false);
-  const [deletingId, setDeletingId] = useState(null);
-
-  const canQuery = useMemo(() => Boolean(appwriteIds.databaseId && appwriteIds.chatCollectionId), []);
-
-  useEffect(() => {
+  const [deletingId, setDeletingId] = useState(null); const canQuery = useMemo(() => Boolean(appwriteIds.databaseId && appwriteIds.chatCollectionId), []); useEffect(() => {
     loadMore(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [canQuery]);
 
-  async function loadMore(initial = false) {
+  }, [canQuery]); async function loadMore(initial = false) {
     if (!canQuery || loading || (!initial && !hasMore)) return;
     setLoading(true);
     try {
@@ -52,8 +46,8 @@ export default function Chat() {
         queries
       );
       const newDocs = res.documents || [];
-      
-      // Fetch author details for relationship fields
+
+
       const enrichedDocs = await Promise.all(newDocs.map(async (doc) => {
         if (doc.author && typeof doc.author === 'string' && appwriteIds.usersCollectionId) {
           try {
@@ -69,7 +63,7 @@ export default function Chat() {
         }
         return doc;
       }));
-      
+
       setItems((prev) => initial ? enrichedDocs : [...prev, ...enrichedDocs]);
       if (newDocs.length < 25) {
         setHasMore(false);
@@ -78,13 +72,11 @@ export default function Chat() {
         setCursorAfter(newDocs[newDocs.length - 1].$id);
       }
     } catch (_) {
-      // ignore
+
     } finally {
       setLoading(false);
     }
-  }
-
-  async function sendMessage(e) {
+  } async function sendMessage(e) {
     e.preventDefault();
     if (!message.trim() || !canQuery || sending || !user?.$id) return;
     setSending(true);
@@ -97,11 +89,11 @@ export default function Chat() {
         ID.unique(),
         {
           message: msgText,
-          author: user.$id, // Save as relationship ID
+          author: user.$id,
         }
       );
-      
-      // Enrich the new document with author info
+
+
       let enrichedDoc = newDoc;
       if (newDoc.author && typeof newDoc.author === 'string' && appwriteIds.usersCollectionId) {
         try {
@@ -117,21 +109,19 @@ export default function Chat() {
       } else {
         enrichedDoc = { ...newDoc, author: { name: user.name || 'Пользователь', id: user.$id } };
       }
-      
-      // Add new message at the beginning of the list
+
+
       setItems((prev) => [enrichedDoc, ...prev]);
       setCursorAfter(null);
       setHasMore(true);
     } catch (e) {
-      // Restore message on error
+
       setMessage(msgText);
       console.error('Failed to send message:', e);
     } finally {
       setSending(false);
     }
-  }
-
-  async function deleteMessage(messageId) {
+  } async function deleteMessage(messageId) {
     if (!canQuery || !user?.$id || deletingId) return;
     setDeletingId(messageId);
     try {
@@ -140,16 +130,14 @@ export default function Chat() {
         appwriteIds.chatCollectionId,
         messageId
       );
-      // Удалить сообщение из списка
+
       setItems((prev) => prev.filter(item => item.$id !== messageId));
     } catch (e) {
       console.error('Failed to delete message:', e);
     } finally {
       setDeletingId(null);
     }
-  }
-
-  return (
+  } return (
     <div className='App with-bg'>
       <p className='titlem'>Чат</p>
       <div className='chat'>
@@ -195,10 +183,10 @@ export default function Chat() {
             <p style={{ textAlign: 'center', color: '#fff' }}>Пока сообщений нет</p>
           ) : null}
           {loading && items.length === 0 && (
-            <div style={{ 
-              display: 'flex', 
-              justifyContent: 'center', 
-              alignItems: 'center', 
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
               padding: '40px',
               minHeight: '200px'
             }}>
@@ -237,11 +225,9 @@ export default function Chat() {
             <p>{sending ? '...' : 'Отправить'}</p>
           </button>
         </form>
-      </div>
-
-      <div style={{
-          marginBottom: 150
-        }}></div>
+      </div>    <div style={{
+        marginBottom: 150
+      }}></div>
     </div>
   );
 }

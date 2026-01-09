@@ -13,6 +13,8 @@ import edit from '../icons/edit.png';
 import play from '../icons/play.png';
 import chat from '../icons/message.png';
 import privacy from '../icons/privacy.png';
+import profile from '../icons/profile.png';
+import settings from '../icons/settings.png';
 
 export default function Profile() {
   const { user, setUser } = useAuth();
@@ -94,9 +96,19 @@ export default function Profile() {
             <p>История игр</p>
           </button>
           <div style={{ width: 'calc(100% - 32px)', height: 1, background: '#38445d', margin: '1px 16px' }}></div>
+          <button className='profbtn' onClick={() => navigate('/')}>
+            <img src={profile} width={17} height={20} style={{filter: 'brightness(1.52)'}} />
+            <p>Друзья</p>
+          </button>
+          <div style={{ width: 'calc(100% - 32px)', height: 1, background: '#38445d', margin: '1px 16px' }}></div>
           <button className='profbtn' onClick={() => navigate('/profile/edit')}>
             <img src={edit} width={18} height={18} />
             <p>Изменить профиль</p>
+          </button>
+                    <div style={{ width: 'calc(100% - 32px)', height: 1, background: '#38445d', margin: '1px 16px' }}></div>
+          <button className='profbtn' onClick={() => navigate('/profile/edit')}>
+            <img src={settings} width={19} height={18} />
+            <p>Настройки</p>
           </button>
         </div>
 
@@ -112,12 +124,12 @@ export default function Profile() {
           marginBottom: 12
         }}>
           <a className='profbtn' href='https://t.me/catbad'>
-            <img src={chat} width={18} height={18} />
+            <img src={chat} width={18} height={18} style={{filter: 'brightness(1.52'}} />
             <p>Нужна помощь? Напишите нам</p>
           </a>
           <div style={{ width: 'calc(100% - 32px)', height: 1, background: '#38445d', margin: '1px 16px' }}></div>
           <button className='profbtn' onClick={() => navigate('/privacy')}>
-            <img src={privacy} width={18} height={18} />
+            <img src={privacy} width={17} height={19} />
             <p>Политика конфиденциальности</p>
           </button>
         </div>

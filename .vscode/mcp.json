@@ -1,0 +1,16 @@
+{
+	"servers": {
+		"zeplin": {
+			"command": "npx",
+			"args": [
+				"-y",
+				"@zeplin/mcp-server@latest"
+			],
+			"env": {
+				"ZEPLIN_ACCESS_TOKEN": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0eXBlIjoicGVyc29uYWxfYWNjZXNzX3Rva2VuIiwiY2xpZW50X2lkIjoiNjk1ZmRiNGNhZGM5OTAwMWNjZTE4NWQ2Iiwic2NvcGUiOiIiLCJpYXQiOjE3Njc4ODk3NDAsImV4cCI6MjA4MzQ1OTAwMCwiaXNzIjoiemVwbGluOmFwaS56ZXBsaW4uaW8iLCJzdWIiOiI2OTFlZDRhZDMwN2FiYTFkMmNmMGZkMzIiLCJqdGkiOiJhMzFjYjRmYS04YzcwLTQ2YWItYmJkNC0wMTcxODI5MDM4NmMifQ.g3lI3_dppuQ0pc9RflGqNiNadYo7ygxYJn13qEcOt8g"
+			},
+			"type": "stdio"
+		}
+	},
+	"inputs": []
+}

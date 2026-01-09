@@ -5,7 +5,6 @@
   max-width: 100vw;
   overflow-x: hidden;
 }
-
 .with-bg {
   background-image: url('./icons/bg.png');
   background-repeat: repeat-x;
@@ -13,7 +12,6 @@
   background-position: top center;
   background-attachment: fixed;
 }
-
 .title {
   margin: 0 auto;
   width: 100%;
@@ -23,7 +21,6 @@
   padding: 12px 0 0 0;
   font-weight: 700;
 }
-
 .titlem {
   margin: 0 auto;
   width: calc(100% - 35px);
@@ -33,7 +30,6 @@
   padding: 12px 20px 0 20px;
   font-weight: 700;
 }
-
 .sub {
   margin: 0 auto;
   width: 100%;
@@ -54,7 +50,6 @@
   margin: 0 auto;
   width: calc(100% - 40px);
 }
-
 .buttons button {
   border: none;
   margin: 8px;
@@ -62,12 +57,10 @@
   width: 100%;
   font-weight: 400;
 }
-
 .b1 {
   background: #2c3548;
   color: #fff;
 }
-
 .b2 {
   background: #83a9f6;
   color: #fff;
@@ -81,16 +74,13 @@
   border-radius: 16px;
   color: #fff;
 }
-
 .auth-card h2 {
   margin: 0 0 12px 0;
   text-align: center;
 }
-
 .auth-form {
   margin-top: 32px;
 }
-
 .auth-form .inputs {
   display: flex;
   flex-direction: column;
@@ -99,7 +89,6 @@
   max-width: 500px;
   margin: 0 auto;
 }
-
 .auth-form input {
   padding: 16px 14px;
   border-radius: 20px;
@@ -108,23 +97,19 @@
   background: #2c3548;
   color: #fff;
 }
-
 .auth-form input::placeholder {
   color: #888eaf;
 }
-
 .auth-error {
   color: #ffb4b4;
   text-align: center;
   margin: 6px 0 0 0;
 }
-
 .auth-links {
   display: flex;
   justify-content: center;
   padding: 0 20px 10px 20px;
 }
-
 .link-btn {
   background: transparent;
   border: none;
@@ -143,7 +128,6 @@
   height: 100vh;
   box-sizing: border-box;
 }
-
 .bottom-bar {
   position: fixed;
   left: 50%;
@@ -159,12 +143,10 @@
   box-shadow: 0 0 32px #0000006b;
   z-index: 3;
 }
-
 .blurred {
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-
 .bb-item {
   display: flex;
   flex-direction: column;
@@ -177,7 +159,6 @@
   transition: .2s;
   margin: 0;
 }
-
 @media screen and (max-width: 400px) {
   .bottom-bar {
     width: 310px;
@@ -187,24 +168,19 @@
     padding: 16px 20px;
   }
 }
-
-
 .bb-item.active {
   opacity: 1;
   background: #83a9f6;
 }
-
 .bb-item.active img {
   filter: brightness(10000);
 }
-
-/* Top header */
 .top-bar {
   position: fixed;
   top: 12px;
-  left: 50%;
+  left: calc(50% - 8px);
   transform: translateX(-50%);
-  width: calc(100% - 64px);
+  width: calc(100vw - 36px);
   max-width: 500px;
   height: 56px;
   display: flex;
@@ -217,12 +193,10 @@
   box-shadow: 0 0 20px #2a3143;
   border-radius: 50px;
 }
-
 .top-bar .logo {
   color: #fff;
   font-weight: 700;
 }
-
 .balance {
   display: flex;
   align-items: center;
@@ -235,7 +209,6 @@
   border-radius: 50px;
   font-weight: 700;
 }
-
 .balance .plus {
   width: 32px;
   height: 32px;
@@ -255,11 +228,9 @@
   min-height: 100vh;
   color: #ffffff;
 }
-
 .deposit-header {
   padding: 12px 16px;
 }
-
 .deposit-page input {
   background: #00000000;
   border: none;
@@ -270,7 +241,6 @@
   margin: 20px 0;
   width: 100%;
 }
-
 .deposit-content {
   padding: 16px;
   border-radius: 20px;
@@ -279,7 +249,6 @@
   width: calc(100% - 64px);
   margin: 0 auto;
 }
-
 .deposit-btn {
   padding: 12px 16px;
   color: #fff;
@@ -287,7 +256,6 @@
   border-radius: 20px;
   margin: 0 16px;
 }
-
 .tips {
   display: flex;
   justify-content: space-between;
@@ -296,7 +264,6 @@
   margin: 12px auto 0 auto;
   padding: 0;
 }
-
 .tips button {
   background: #38445d;
   border: none;
@@ -305,14 +272,12 @@
   width: 24%;
   border-radius: 20px;
 }
-
 .profile {
   color: #fff;
   max-width: 500px;
   margin: 0 auto;
   padding: 16px;
 }
-
 .profbtn {
   background: #2c3548;
   width: 100%;
@@ -325,7 +290,6 @@
   display: flex;
   align-items: center;
 }
-
 .profbtn p {
   margin-left: 12px;
   color: #e5e8f8;
@@ -336,72 +300,59 @@ a.profbtn {
   text-decoration: none;
   width: auto;
 }
-
 .avatar {
   width: 100px;
   height: 100px;
   border-radius: 50%;
   margin: 0 auto 12px auto;
 }
-
 .invert {
   filter: invert();
   padding: 30px;
 }
-
 .flex {
   display: flex;
   align-items: center;
   margin-top: 28px;
 }
-
 .name {
   margin: 0;
   font-size: 26px;
   text-align: center;
 }
-
 .email {
   margin: 8px 0 12px 0;
   color: #c8cce2;
   text-align: center;
 }
-
-/* Chat */
 .chat-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .chat-item {
   background: #2c3548;
   border-radius: 20px;
   padding: 20px;
   color: #fff;
 }
-
 .chat-author {
   font-weight: 700;
   margin-bottom: 6px;
 }
-
 .chat-message {
   margin-bottom: 6px;
 }
-
 .chat-time {
   opacity: 0.7;
   font-size: 12px;
 }
-
 .chat {
   max-width: 500px;
   margin: 20px auto;
   padding: 0 16px;
   background: #2a3143;
 }
-
 .chat-form {
   display: flex;
   gap: 8px;
@@ -413,7 +364,6 @@ a.profbtn {
   left: 50%;
   transform: translateX(-50%);
 }
-
 .chat-input {
   flex: 1;
   padding: 12px 14px;
@@ -424,29 +374,23 @@ a.profbtn {
   color: #000;
   box-shadow: 0 0 20px #0000003f;
 }
-
 .chat-input::placeholder {
   color: #000;
 }
-
 .b3 {
   background: #780e9590;
   color: #fff
 }
-
-/* Games */
 .games {
   max-width: 500px;
   margin: 20px auto;
   padding: 0 16px 80px 16px;
 }
-
 .games-list {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
-
 .game-card {
   border-radius: 32px;
   padding: 16px 28px;
@@ -456,33 +400,36 @@ a.profbtn {
   box-shadow: 0 0 32px #00000026, inset 0 0 32px #1515175f;
   border: 1px solid #ffffff7f;
   overflow: hidden;
+  position: relative;
+  background-image: url('./icons/bag.png');
+  background-size: 100% auto;
+  background-position: center;
+  background-repeat: no-repeat;
 }
-
+.game-card > * {
+  position: relative;
+}
 .row {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
   flex: 1;
 }
-
 .bag {
   width: 110px;
   height: 110px;
   margin: -12px -24px 0 0;
   filter: drop-shadow(0 0 40px #ffd00090);
 }
-
 .ingame {
   margin: 0;
   font-weight: 400;
 }
-
 .col2 {
   display: flex;
   flex-direction: column;
   align-items: center;
 }
-
 .win {
   color: #2a3143;
   font-weight: 400;
@@ -491,7 +438,6 @@ a.profbtn {
   line-height: 40px;
   margin: 0;
 }
-
 .crown {
   width: 21px;
   height: 20px;
@@ -500,33 +446,25 @@ a.profbtn {
   mix-blend-mode: overlay;
   background-blend-mode: overlay;
 }
-
 .prize {
   position: relative;
-  /* добавлено */
-  background: #3232323f;
+  background: #1d1d1d43;
   padding: 3px 24px;
   border-radius: 100px;
   font-weight: 700;
   overflow: hidden;
-  /* чтобы bg не выходил за границы */
   box-shadow: 0 0 200px #fff;
   border: 1.5px solid #ffffff65;
 }
-
 .prize p {
   font-size: 22px;
-  margin: 0;
+  margin: 4px 0 0 0;
   color: #fff;
 }
-
 .prize .bg {
   position: absolute;
-  /* добавлено */
   top: 0;
-  /* добавлено */
   left: 0;
-  /* добавлено */
   width: 100%;
   height: 100%;
   background: #6c6c6c;
@@ -536,13 +474,11 @@ a.profbtn {
   box-shadow: inset 0 0 20px #00000077;
   opacity: 0.6;
 }
-
-
 .status {
   background: #555555;
   mix-blend-mode: overlay;
   background-blend-mode: overlay;
-  padding: 4px 8px;
+  padding: 5px 8px 3px 8px;
   border-radius: 100px;
   margin: 0;
   text-align: center;
@@ -550,10 +486,9 @@ a.profbtn {
   font-size: 13px;
   color: #fff;
 }
-
 .countdown-progress {
   position: relative;
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.2);
   height: 24px;
   border-radius: 100px;
   overflow: hidden;
@@ -562,37 +497,32 @@ a.profbtn {
   align-items: center;
   justify-content: center;
 }
-
 .countdown-progress-bar {
   position: absolute;
   left: 0;
   top: 0;
   height: 100%;
-  background: #fff;
-  border-radius: 100px;
+  background: linear-gradient(to right, #fc8e66, #ff4e4e);
   transition: width 0.3s ease;
 }
-
 .countdown-time {
   position: relative;
   z-index: 1;
-  color: #2a3143;
+  color: #fff;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 15px;
+  margin: 2px 8px 0 8px;
 }
-
 .stake {
   font-weight: 700;
   font-size: 24px;
   margin: 0;
 }
-
 .people {
   width: 15px;
   height: 18px;
   margin-top: 4px;
 }
-
 .jackpot {
   background: linear-gradient(to bottom, #e1b30f, #d57909);
   padding: 6px 12px;
@@ -601,16 +531,13 @@ a.profbtn {
 
   display: none;
 }
-
 .prev {
   display: flex;
   align-items: center;
 }
-
 .prev p {
   text-wrap: nowrap;
 }
-
 .prev .line {
   height: 2px;
   width: 100%;
@@ -621,38 +548,31 @@ a.profbtn {
   border-radius: 4px;
   margin-top: 4px;
 }
-
 .game-row {
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
 }
-
 .game-stake {
   font-weight: 700;
 }
-
 .game-status {
   opacity: 0.8;
 }
-
 .game-players,
 .game-jackpot {
   opacity: 0.9;
 }
-
 .row-buttons {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
-
 .loto-multi-cards {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
 }
-
 .loto-row-9 {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
@@ -663,44 +583,37 @@ a.profbtn {
 .game-area {
   color: #fff;
 }
-
 .loto {
   display: grid;
   grid-template-columns: 1fr;
   gap: 12px;
   margin-top: 12px;
 }
-
 .loto-card {
   background: #780e9590;
   padding: 12px;
   border-radius: 12px;
 }
-
 .loto-row {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 8px;
 }
-
 .cell {
   background: #2d2f36;
   border-radius: 10px;
   text-align: center;
   padding: 10px 0;
 }
-
 .cell.marked {
   background: #780e9590;
   color: #fff;
 }
-
 .bag {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
 }
-
 .chip {
   background: #2d2f36;
   color: #fff;
@@ -708,7 +621,6 @@ a.profbtn {
   padding: 6px 10px;
   font-size: 12px;
 }
-
 .plate {
   position: fixed;
   top: 0;
@@ -720,19 +632,16 @@ a.profbtn {
   z-index: 999999;
   background: #161921af;
 }
-
 .playingarea {
   margin: 20px auto;
   padding: 12px 16px 80px 16px;
   max-width: 500px;
 }
-
 .playingarea p,
 .playingarea h2,
 .playingarea div {
   color: #fff;
 }
-
 .sendbtn {
   background: #fff;
   color: #000;
@@ -740,7 +649,6 @@ a.profbtn {
   border: none;
   padding: 0 16px;
 }
-
 .chatp {
   color: #636363;
   text-align: center;
@@ -757,7 +665,6 @@ a.profbtn {
   transition: all 0.3s ease;
   z-index: 1;
 }
-
 .l1 {
   box-shadow: 20px 14px 24px 0 rgba(0, 0, 0, 0.4), inset -2px -4px 5px 0 #252048;
   background-image: radial-gradient(circle at 19% 20%, #a490fa, #6961aa 73%);
@@ -768,30 +675,25 @@ a.profbtn {
   justify-content: center;
   align-items: center;
 }
-
 .l2 {
   background-image: linear-gradient(311deg, #b7a7ff 85%, #2b284a 15%);
   width: calc(100% - 10px);
   height: calc(100% - 10px);
   border-radius: 50%;
-  margin-top: -2px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .l3 {
   box-shadow: inset 0 3px 15px 0 rgba(0, 0, 0, 0.5);
   background-image: radial-gradient(circle at 65% 77%, #4f586e, #2c313e 56%);
   width: calc(100% - 7px);
   height: calc(100% - 7px);
   border-radius: 50%;
-  margin-top: -2px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
-
 .l4 {
   border: solid 1.5px #ffffff31;
   box-shadow: inset 0 0 8px #0000006b;
@@ -802,19 +704,17 @@ a.profbtn {
   justify-content: center;
   align-items: center;
 }
-
 .barrel p {
   text-align: center;
   color: #8f83f8;
   text-shadow: 0 2px 5px #000000b3, 0 1px 0 #ffffffcc;
-  margin: 0;
+  margin: 6px 0 0 0;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
+  line-height: 1;
 }
-
 .lines {
   display: flex;
   flex-direction: column;
@@ -824,7 +724,6 @@ a.profbtn {
   z-index: 0;
   margin-top: 15px;
 }
-
 .r {
   height: 12px;
   width: 100%;
@@ -832,17 +731,14 @@ a.profbtn {
   border-radius: 50px;
   margin: 8px 0;
 }
-
 .unit img {
   width: 25px;
   height: 25px;
 }
-
 .ticon {
   width: 21.5px;
   height: 16px;
 }
-
 .played {
   color: #2a3143;
   background: #83a9f6;
@@ -852,13 +748,11 @@ a.profbtn {
   width: min-content;
   margin: 0 auto 32px auto;
 }
-
 .played img {
   filter: brightness(0.3);
   margin: 0 4px 0 0;
   transform: translate(0, 2px);
 }
-
 .yacheika {
   padding: 6px;
   min-height: 40px;
@@ -867,7 +761,6 @@ a.profbtn {
   align-items: center;
   justify-content: center;
 }
-
 .yacheika span {
   font-size: 20px;
 }

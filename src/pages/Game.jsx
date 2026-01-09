@@ -17,6 +17,9 @@ import { playWinSound, playLooseSound, playClickSound, toggleSound, isSoundEnabl
 import crown from '../icons/crown.png'
 import person from '../icons/person.png'
 import ticket from '../icons/ticket.png'
+import change from '../icons/change.png'
+import delet from '../icons/delete.png'
+import orange from '../icons/orange.png'
 
 export default function Game() {
   const { id } = useParams();
@@ -43,29 +46,20 @@ export default function Game() {
   const prizeProcessedRef = useRef(false);
   const historyProcessedRef = useRef(false);
   const userTicketCountRef = useRef(0);
-
-  // Загрузка игр из localStorage
   useEffect(() => {
     const { initializeGames, updateGamesState } = require('../utils/gameManager');
     let currentGames = initializeGames();
     currentGames = updateGamesState(currentGames, false);
     setGames(currentGames);
-
-    // Сбросить флаги обработки при смене игры
     jackpotProcessedRef.current = false;
     prizeProcessedRef.current = false;
     historyProcessedRef.current = false;
     userTicketCountRef.current = 0;
     setJackpotWon(false);
     setJackpotAmount(0);
-    setShowWinAnimation(false);
-
-    const currentGame = getGameById(currentGames, id);
+    setShowWinAnimation(false); const currentGame = getGameById(currentGames, id);
     if (currentGame) {
-      setGame(currentGame);
-
-      // Проверить, участвует ли пользователь
-      const player = currentGame.players?.find(p => p.userId === user?.$id);
+      setGame(currentGame); const player = currentGame.players?.find(p => p.userId === user?.$id);
       if (player && currentGame.status !== 'finished') {
         setIsInGame(true);
         setUserCards(player.cards || []);
@@ -73,85 +67,45 @@ export default function Game() {
       } else {
         setIsInGame(false);
         setGameFinished(false);
-        // Если игра завершена, не показывать превью карточек - игра закончена
         if (currentGame.status !== 'finished') {
-          // Показать превью карточек только если игра не завершена
           const previewCards = Array.from({ length: ticketCount }, () => generateCard3x9());
           setUserCards(previewCards);
         }
-      }
-
-      // Если игра завершена, показать результат и не позволять покупать билеты
-      if (currentGame.status === 'finished') {
+      } if (currentGame.status === 'finished') {
         setGameFinished(true);
-        setIsInGame(false); // Убедиться, что пользователь не в игре после завершения
+        setIsInGame(false);
         const realWinners = (currentGame.winners || []).filter(w => !w.startsWith('bot_'));
         setIsWinner(realWinners.includes(user?.$id));
       }
     }
   }, [id, user, ticketCount]);
-
-  // Обновление состояния игры каждую секунду
   useEffect(() => {
-    if (games.length === 0) return;
-
-    const interval = setInterval(() => {
+    if (games.length === 0) return; const interval = setInterval(() => {
       setGames(prevGames => {
         const updated = updateGamesState(prevGames, false);
-        const currentGame = getGameById(updated, id);
-
-        if (currentGame) {
-          setGame(currentGame);
-
-          // Обновить выпавшие числа
-          if (currentGame.status === 'running' && currentGame.draw && currentGame.drawIndex > 0) {
+        const currentGame = getGameById(updated, id); if (currentGame) {
+          setGame(currentGame); if (currentGame.status === 'running' && currentGame.draw && currentGame.drawIndex > 0) {
             const newDrawnNumbers = currentGame.draw.slice(0, currentGame.drawIndex);
-            setDrawnNumbers(newDrawnNumbers);
-
-            // Проверить победителей только если игра еще не завершена
-            if (currentGame.status === 'running' && !gameFinished) {
+            setDrawnNumbers(newDrawnNumbers); if (currentGame.status === 'running' && !gameFinished) {
               const result = checkWinners(currentGame);
-              // Игра заканчивается если выиграл ЛЮБОЙ игрок (боты включая)
               if (result.anyWinner) {
-                // Завершить игру
-                const finished = finishGame(updated, id, result.realWinners);
-
-                setGameFinished(true);
+                const finished = finishGame(updated, id, result.realWinners); setGameFinished(true);
                 const userWon = result.realWinners.includes(user?.$id);
-                setIsWinner(userWon);
-
-                // Воспроизвести звук выигрыша или проигрыша
-                if (userWon) {
+                setIsWinner(userWon); if (userWon) {
                   playWinSound();
                   setShowWinAnimation(true);
-                  // Скрыть анимацию через 3 секунды
                   setTimeout(() => setShowWinAnimation(false), 3000);
                 } else {
                   playLooseSound();
-                }
-
-                // Получить завершенную игру из массива
-                const finishedGame = getGameById(finished, id);
-
-                // Начислить выигрыш победителям и джекпот (если выиграли)
-                if (result.realWinners.length > 0 && result.realWinners.includes(user?.$id) && appwriteIds.usersCollectionId && !prizeProcessedRef.current) {
+                } const finishedGame = getGameById(finished, id); if (result.realWinners.length > 0 && result.realWinners.includes(user?.$id) && appwriteIds.usersCollectionId && !prizeProcessedRef.current) {
                   prizeProcessedRef.current = true;
-                  jackpotProcessedRef.current = true;
-
-                  const totalStake = currentGame.totalPlayers * currentGame.stake;
+                  jackpotProcessedRef.current = true; const totalStake = currentGame.totalPlayers * currentGame.stake;
                   const winnerCount = result.realWinners.length;
-                  const prize = (totalStake / winnerCount) * 0.9;
-
-                  // Розыгрыш джекпота с вероятностью 5%
-                  const wonJackpot = Math.random() < 0.05;
-                  const jackpotValue = wonJackpot && currentGame.jackpot ? currentGame.jackpot : 0;
-
-                  if (wonJackpot && currentGame.jackpot) {
+                  const prize = (totalStake / winnerCount) * 0.9; const wonJackpot = Math.random() < 0.05;
+                  const jackpotValue = wonJackpot && currentGame.jackpot ? currentGame.jackpot : 0; if (wonJackpot && currentGame.jackpot) {
                     setJackpotWon(true);
                     setJackpotAmount(currentGame.jackpot);
-                  }
-
-                  databases.getDocument(appwriteIds.databaseId, appwriteIds.usersCollectionId, user.$id)
+                  } databases.getDocument(appwriteIds.databaseId, appwriteIds.usersCollectionId, user.$id)
                     .then(userDoc => {
                       const balance = Number(userDoc.balance || 0);
                       const newBalance = balance + prize + jackpotValue;
@@ -164,62 +118,38 @@ export default function Game() {
                     })
                     .then(() => {
                       window.dispatchEvent(new CustomEvent('balance-changed'));
-                      // Сохранить историю игры (выигрыш)
                       if (finishedGame) {
                         saveGameHistory(finishedGame, true, prize + jackpotValue);
                       }
                     })
                     .catch(err => console.error('Failed to credit prize', err));
                 } else {
-                  // Проверить, участвовал ли пользователь в игре
                   if (finishedGame) {
                     const playerInGame = finishedGame.players?.find(p => p.userId === user?.$id);
                     if (playerInGame && !historyProcessedRef.current) {
-                      // Сохранить историю игры (проигрыш)
                       saveGameHistory(finishedGame, false, 0);
                     }
                   }
-                }
-
-                return finished;
+                } return finished;
               }
-            }
-
-            // Если игра закончилась, но еще не показывали результат
-            if (currentGame.status === 'finished' && !gameFinished) {
+            } if (currentGame.status === 'finished' && !gameFinished) {
               setGameFinished(true);
               const realWinners = (currentGame.winners || []).filter(w => !w.startsWith('bot_'));
               const userWon = realWinners.includes(user?.$id);
-              setIsWinner(userWon);
-
-              // Воспроизвести звук выигрыша или проигрыша
-              if (userWon) {
+              setIsWinner(userWon); if (userWon) {
                 playWinSound();
                 setShowWinAnimation(true);
-                // Скрыть анимацию через 3 секунды
                 setTimeout(() => setShowWinAnimation(false), 3000);
               } else {
                 playLooseSound();
-              }
-
-              // Начислить выигрыш и джекпот при завершении игры по времени
-              if (userWon && appwriteIds.usersCollectionId && !prizeProcessedRef.current) {
-                prizeProcessedRef.current = true;
-
-                const totalStake = currentGame.totalPlayers * currentGame.stake;
+              } if (userWon && appwriteIds.usersCollectionId && !prizeProcessedRef.current) {
+                prizeProcessedRef.current = true; const totalStake = currentGame.totalPlayers * currentGame.stake;
                 const winnerCount = realWinners.length;
-                const prize = winnerCount > 0 ? (totalStake / winnerCount) * 0.9 : 0;
-
-                // Розыгрыш джекпота с вероятностью 5%
-                const wonJackpot = Math.random() < 0.05;
-                const jackpotValue = wonJackpot && currentGame.jackpot ? currentGame.jackpot : 0;
-
-                if (wonJackpot && currentGame.jackpot) {
+                const prize = winnerCount > 0 ? (totalStake / winnerCount) * 0.9 : 0; const wonJackpot = Math.random() < 0.05;
+                const jackpotValue = wonJackpot && currentGame.jackpot ? currentGame.jackpot : 0; if (wonJackpot && currentGame.jackpot) {
                   setJackpotWon(true);
                   setJackpotAmount(currentGame.jackpot);
-                }
-
-                if (prize > 0 || jackpotValue > 0) {
+                } if (prize > 0 || jackpotValue > 0) {
                   databases.getDocument(appwriteIds.databaseId, appwriteIds.usersCollectionId, user.$id)
                     .then(userDoc => {
                       const balance = Number(userDoc.balance || 0);
@@ -233,136 +163,90 @@ export default function Game() {
                     })
                     .then(() => {
                       window.dispatchEvent(new CustomEvent('balance-changed'));
-                      // Сохранить историю игры (выигрыш)
                       saveGameHistory(currentGame, true, prize + jackpotValue);
                     })
                     .catch(err => console.error('Failed to credit prize', err));
                 } else {
-                  // Сохранить историю игры (выигрыш, но без приза)
                   saveGameHistory(currentGame, true, 0);
                 }
               } else {
-                // Проверить, участвовал ли пользователь в игре
                 const playerInGame = currentGame.players?.find(p => p.userId === user?.$id);
                 if (playerInGame && !historyProcessedRef.current) {
-                  // Сохранить историю игры (проигрыш)
                   saveGameHistory(currentGame, false, 0);
                 }
               }
             }
-          }
-
-          // Обновить карточки пользователя если он в игре (только если игра не завершена)
-          if (currentGame.status !== 'finished') {
+          } if (currentGame.status !== 'finished') {
             const player = currentGame.players?.find(p => p.userId === user?.$id);
             if (player) {
               setUserCards(player.cards || []);
               setIsInGame(true);
             }
           } else {
-            // Если игра завершена, убедиться что пользователь не в игре
             setIsInGame(false);
           }
-        }
-
-        return updated;
+        } return updated;
       });
-    }, 1000);
-
-    return () => clearInterval(interval);
+    }, 1000); return () => clearInterval(interval);
   }, [games.length, id, user, gameFinished]);
-
-  // Обновление превью карточек при изменении количества билетов
   useEffect(() => {
     if (!isInGame) {
-      // Регенерировать карточки только если количество не совпадает
-      // Это предотвращает пересоздание карточек при ручном удалении/обновлении
+
       if (userCards.length !== ticketCount) {
         const previewCards = Array.from({ length: ticketCount }, () => generateCard3x9());
         setUserCards(previewCards);
       }
     }
   }, [ticketCount, isInGame, userCards.length]);
-
-  // Автоматический редирект через 5 секунд после окончания игры
   useEffect(() => {
     if (gameFinished) {
       const redirectTimer = setTimeout(() => {
         playClickSound();
         navigate('/app', { replace: true });
-      }, 5000);
-
-      return () => clearTimeout(redirectTimer);
+      }, 5000); return () => clearTimeout(redirectTimer);
     }
   }, [gameFinished, navigate]);
-
-  // Убрали автоматический редирект - пользователь сам решает, что делать после игры
-
-  // Инициализация состояния звука
   useEffect(() => {
     setSoundOn(isSoundEnabled());
   }, []);
-
-  // Автоматический редирект через 5 секунд после окончания игры
   useEffect(() => {
     if (gameFinished) {
       const redirectTimer = setTimeout(() => {
         playClickSound();
         navigate('/app', { replace: true });
-      }, 5000);
-
-      return () => clearTimeout(redirectTimer);
+      }, 5000); return () => clearTimeout(redirectTimer);
     }
   }, [gameFinished, navigate]);
-
-  // Инициализация аудио
   useEffect(() => {
     audioRef.current = new Audio(barrelSound);
-    audioRef.current.volume = 0.5; // Установить громкость (0.0 - 1.0)
-
-    return () => {
+    audioRef.current.volume = 0.5; return () => {
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
     };
   }, []);
-
-  // Воспроизведение звука при выпадении нового числа
   useEffect(() => {
-    if (!game) return;
-
-    const currentStatus = game.status;
+    if (!game) return; const currentStatus = game.status;
     const prevStatus = gameStatusRef.current;
-
-    // Если игра только что перешла в статус 'running', инициализировать счетчик
     if (currentStatus === 'running' && prevStatus !== 'running') {
-      // Игра только что началась - установить счетчик на текущее количество чисел
-      // Это предотвратит воспроизведение звука для чисел, которые уже были выпавшими
+
       previousDrawnCountRef.current = drawnNumbers.length;
       gameStatusRef.current = currentStatus;
       return;
     }
-
-    // Если игра не активна, сбросить счетчик
     if (currentStatus !== 'running') {
       if (prevStatus === 'running') {
-        // Игра только что закончилась - сбросить счетчик для следующей игры
         previousDrawnCountRef.current = 0;
       }
       gameStatusRef.current = currentStatus;
       return;
     }
-
-    // Игра активна ('running') - проверить, появилось ли новое число
     if (currentStatus === 'running' && drawnNumbers.length > previousDrawnCountRef.current) {
-      // Новое число выпало - воспроизвести звук
       if (soundOn && audioRef.current) {
         try {
-          // Сбросить время воспроизведения на начало для повторного воспроизведения
           audioRef.current.currentTime = 0;
           audioRef.current.play().catch(err => {
-            // Игнорировать ошибки автоплей (браузер может блокировать автоплей без взаимодействия пользователя)
             console.log('Audio play error (ignored):', err);
           });
         } catch (err) {
@@ -370,40 +254,24 @@ export default function Game() {
         }
       }
       previousDrawnCountRef.current = drawnNumbers.length;
-    }
-
-    gameStatusRef.current = currentStatus;
-  }, [drawnNumbers, game, soundOn]);
-
-  async function buyTickets() {
+    } gameStatusRef.current = currentStatus;
+  }, [drawnNumbers, game, soundOn]); async function buyTickets() {
     if (!game || !user?.$id || isInGame) return;
-
-    // Запретить покупку билетов, если игра завершена
     if (game.status === 'finished' || gameFinished) {
       setError('Игра уже завершена');
       return;
     }
-
-    // Проверить, есть ли у пользователя активная игра в другой игре
     const activeGame = getActiveGameForUser(games, user?.$id);
     if (activeGame && activeGame.id !== game.id) {
       setError('Вы уже участвуете в другой игре. Завершите текущую игру перед началом новой.');
       return;
     }
-
-    // Запретить покупку билетов только во время игры
     if (game.status === 'running') {
       setError('Нельзя покупать билеты во время игры');
       return;
     }
-
-    // Воспроизвести звук клика при покупке билета
-    playClickSound();
-
-    setLoading(true);
-    setError('');
-
-    try {
+    playClickSound(); setLoading(true);
+    setError(''); try {
       const userDoc = await databases.getDocument(
         appwriteIds.databaseId,
         appwriteIds.usersCollectionId,
@@ -411,16 +279,10 @@ export default function Game() {
       );
       const balance = Number(userDoc.balance || 0);
       const played = Number(userDoc.played || 0);
-      // Использовать фактическое количество карточек (может отличаться от ticketCount при ручных изменениях)
       const actualTicketCount = userCards.length;
-      const totalCost = game.stake * actualTicketCount;
-
-      if (balance < totalCost) {
+      const totalCost = game.stake * actualTicketCount; if (balance < totalCost) {
         throw new Error('Недостаточно средств');
-      }
-
-      // Списать средства
-      await databases.updateDocument(
+      } await databases.updateDocument(
         appwriteIds.databaseId,
         appwriteIds.usersCollectionId,
         user.$id,
@@ -429,20 +291,9 @@ export default function Game() {
           played: played + 1
         }
       );
-      window.dispatchEvent(new CustomEvent('balance-changed'));
-
-      // Использовать текущие карточки пользователя (которые могли быть обновлены/удалены)
-      const cards = userCards;
-      userTicketCountRef.current = actualTicketCount; // Сохранить количество билетов
-
-      // Добавить игрока в игру
-      const updatedGames = addPlayerToGame(games, id, user.$id, cards);
-
-      // Обновить состояние игр после добавления игрока
-      const finalGames = updateGamesState(updatedGames, false);
-      setGames(finalGames);
-
-      const updatedGame = getGameById(finalGames, id);
+      window.dispatchEvent(new CustomEvent('balance-changed')); const cards = userCards;
+      userTicketCountRef.current = actualTicketCount; const updatedGames = addPlayerToGame(games, id, user.$id, cards); const finalGames = updateGamesState(updatedGames, false);
+      setGames(finalGames); const updatedGame = getGameById(finalGames, id);
       if (updatedGame) {
         setGame(updatedGame);
         setIsInGame(true);
@@ -454,39 +305,23 @@ export default function Game() {
       setLoading(false);
     }
   }
-
-  // Функция для сохранения истории игры
   async function saveGameHistory(game, won, prize) {
     if (!user?.$id || !appwriteIds.usersCollectionId || !appwriteIds.gameinfoCollectionId) {
       console.log('saveGameHistory: Missing required IDs', { userId: user?.$id, usersCollectionId: appwriteIds.usersCollectionId, gameinfoCollectionId: appwriteIds.gameinfoCollectionId });
       return;
-    }
-
-    if (historyProcessedRef.current) {
+    } if (historyProcessedRef.current) {
       console.log('saveGameHistory: Already processed');
       return;
     }
-
-    // Проверить, участвовал ли пользователь в игре
     const player = game.players?.find(p => p.userId === user.$id);
     if (!player) {
       console.log('saveGameHistory: User not in game', { gamePlayers: game.players, userId: user.$id });
       return;
-    }
-
-    try {
-      historyProcessedRef.current = true;
-
-      // Получить количество билетов из игры или из ref
-      const tickets = player.cards?.length || userTicketCountRef.current || 1;
+    } try {
+      historyProcessedRef.current = true; const tickets = player.cards?.length || userTicketCountRef.current || 1;
       const dep = game.stake * tickets;
       const wonAmount = won ? prize : 0;
-      const players = game.totalPlayers || 0;
-
-      console.log('saveGameHistory: Saving', { dep, won: wonAmount, tickets, players, gameId: game.id });
-
-      // Создать документ в gameinfo
-      const gameInfoId = ID.unique();
+      const players = game.totalPlayers || 0; console.log('saveGameHistory: Saving', { dep, won: wonAmount, tickets, players, gameId: game.id }); const gameInfoId = ID.unique();
       const gameInfoDoc = await databases.createDocument(
         appwriteIds.databaseId,
         appwriteIds.gameinfoCollectionId,
@@ -497,65 +332,42 @@ export default function Game() {
           tickets: tickets,
           players: players
         }
-      );
-
-      console.log('saveGameHistory: Created gameinfo document', gameInfoId, gameInfoDoc);
-
-      // Получить текущий документ пользователя
-      const userDoc = await databases.getDocument(
+      ); console.log('saveGameHistory: Created gameinfo document', gameInfoId, gameInfoDoc); const userDoc = await databases.getDocument(
         appwriteIds.databaseId,
         appwriteIds.usersCollectionId,
         user.$id
-      );
-
-      console.log('saveGameHistory: Current user doc', {
+      ); console.log('saveGameHistory: Current user doc', {
         history: userDoc.history,
         historyType: typeof userDoc.history,
         isArray: Array.isArray(userDoc.history)
       });
-
-      // Получить текущий массив history или создать новый
-      // В Appwrite relationship может быть массивом строк (ID) или массивом объектов
       let currentHistoryIds = [];
       if (userDoc.history) {
         if (Array.isArray(userDoc.history)) {
-          // Если это массив, извлечь ID
           currentHistoryIds = userDoc.history.map(item => {
             if (typeof item === 'string') return item;
             if (item && typeof item === 'object' && item.$id) return item.$id;
             return null;
           }).filter(Boolean);
         } else if (typeof userDoc.history === 'string') {
-          // Если это одна строка (ID)
           currentHistoryIds = [userDoc.history];
         } else if (userDoc.history && typeof userDoc.history === 'object' && userDoc.history.$id) {
-          // Если это один объект
           currentHistoryIds = [userDoc.history.$id];
         }
       }
-
-      // Добавить новый ID в массив history (relationship)
-      // В Appwrite для relationship массивов нужно передавать массив строк (ID)
-      const updatedHistory = [...currentHistoryIds, gameInfoId];
-
-      console.log('saveGameHistory: Updating user history', {
+      const updatedHistory = [...currentHistoryIds, gameInfoId]; console.log('saveGameHistory: Updating user history', {
         currentLength: currentHistoryIds.length,
         newLength: updatedHistory.length,
         currentHistoryIds,
         updatedHistory,
         gameInfoId
       });
-
-      // Обновить документ пользователя с массивом ID для relationship
-      // В Appwrite для relationship нужно передавать массив ID (строк)
       await databases.updateDocument(
         appwriteIds.databaseId,
         appwriteIds.usersCollectionId,
         user.$id,
         { history: updatedHistory }
-      );
-
-      console.log('saveGameHistory: Success - history updated with', updatedHistory.length, 'items');
+      ); console.log('saveGameHistory: Success - history updated with', updatedHistory.length, 'items');
     } catch (err) {
       console.error('Failed to save game history:', err);
       console.error('Error details:', {
@@ -564,80 +376,56 @@ export default function Game() {
         type: err.type,
         response: err.response
       });
-      historyProcessedRef.current = false; // Разрешить повторную попытку при ошибке
+      historyProcessedRef.current = false;
     }
-  }
-
-  function isMarked(num) {
+  } function isMarked(num) {
     return drawnNumbers.includes(num);
   }
-
-  // Обновить конкретный билет (регенерировать случайно)
   function updateTicket(cardIdx) {
-    if (isInGame) return; // Нельзя обновлять билеты после покупки
-
-    const updatedCards = [...userCards];
+    if (isInGame) return; const updatedCards = [...userCards];
     updatedCards[cardIdx] = generateCard3x9();
     setUserCards(updatedCards);
   }
-
-  // Удалить билет
   function deleteTicket(cardIdx) {
-    if (isInGame) return; // Нельзя удалять билеты после покупки
-    if (userCards.length <= 1) return; // Должен остаться хотя бы один билет
-
-    const updatedCards = userCards.filter((_, idx) => idx !== cardIdx);
+    if (isInGame) return;
+    if (userCards.length <= 1) return; const updatedCards = userCards.filter((_, idx) => idx !== cardIdx);
     setUserCards(updatedCards);
     setTicketCount(updatedCards.length);
   }
-
-  // Получить последние 5 выпавших чисел для отображения (самое новое слева)
   const last5Numbers = useMemo(() => {
     if (drawnNumbers.length === 0) return [null, null, null, null, null];
     const last5 = drawnNumbers.slice(-5);
     while (last5.length < 5) {
       last5.unshift(null);
-    }
-
-    return last5.reverse();
+    } return last5.reverse();
   }, [drawnNumbers]);
-
-  // Функция для форматирования времени
   function formatTime(seconds) {
     if (seconds === null || seconds === undefined) return '00:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
-
-  // Получить название игры по ставке
   function getGameTitle(stake) {
     const titles = ['LITE', 'PRO', 'PRIME', 'ELITE', 'PRIME'];
     const stakes = [0.2, 0.5, 1, 2, 10];
     const index = stakes.indexOf(stake);
     return index !== -1 ? titles[index] : 'ИГРА';
   }
-
-  // Получить цвет для названия игры
   function getGameColor(stake) {
     const colors = ['#9fc057', '#83a9f6', '#fc8d65', '#986ff2', '#c8cce2'];
     const stakes = [0.2, 0.5, 1, 2, 10];
     const index = stakes.indexOf(stake);
     return index !== -1 ? colors[index] : '#83a9f6';
   }
-
-  // Получить статистику по карточкам (только ближайшие к победе)
   const cardsProgress = useMemo(() => {
     if (!game || game.status !== 'running') return {};
     const progress = getCardsProgress(game);
-    // Оставить только минимальное количество оставшихся номеров (ближайшие к победе)
+
     const keys = Object.keys(progress).map(k => parseInt(k)).sort((a, b) => a - b);
     if (keys.length === 0) return {};
     const minRemaining = keys[0];
     return { [minRemaining]: progress[minRemaining] };
-  }, [game]);
-
-  if (!game) {
+  }, [game]); if (!game) {
     return (
       <div className='App with-bar with-bg'>
         <div className='auth-card'>
@@ -645,31 +433,11 @@ export default function Game() {
         </div>
       </div>
     );
-  }
-
-  return (
+  } return (
     <div className='App with-bg'>
       <div className='playingarea'>
         <h2>Игра {game.stake}₼</h2>
         {error ? <p className='auth-error'>{error}</p> : null}
-
-        {/* Статус игры */}
-        <div className='game-info' style={{ marginBottom: '20px' }}>
-          {game.status === 'waiting' && (
-            <p>Игроков: {game.totalPlayers} / 20</p>
-          )}
-          {game.status === 'counting' && (
-            <p>До начала: {Math.ceil(game.startCountdown)} сек • Игроков: {game.totalPlayers}</p>
-          )}
-          {game.status === 'running' && (
-            <p>Игра идет • Игроков: {game.totalPlayers}</p>
-          )}
-          {game.status === 'finished' && (
-            <p>Игра завершена</p>
-          )}
-        </div>
-
-        {/* Окошки с числами (только во время игры) */}
         {game.status === 'running' && (
           <div style={{
             display: 'flex',
@@ -678,9 +446,7 @@ export default function Game() {
             <div className="lines">
               <div className="r"></div>
               <div className="r"></div>
-            </div>
-
-            <div className='barrels' style={{
+            </div>           <div className='barrels' style={{
               display: 'flex',
               gap: '8px',
               marginBottom: '20px',
@@ -688,7 +454,7 @@ export default function Game() {
               alignItems: 'center',
             }}>
               {last5Numbers.map((num, idx) => {
-                const isLatest = idx === 0; // Первое окошко (самое новое число) - самое большое
+                const isLatest = idx === 0;
                 return (
                   <div
                     key={idx}
@@ -716,8 +482,6 @@ export default function Game() {
             </div>
           </div>
         )}
-
-        {/* Статистика карточек (только во время игры) */}
         {game.status === 'running' && (
           <div style={{
             backgroundColor: '#2c3548',
@@ -725,7 +489,6 @@ export default function Game() {
             borderRadius: '12px',
             marginBottom: '20px',
           }}>
-            {/* Верхняя строка с информацией */}
             <div style={{
               display: 'flex',
               alignItems: 'center',
@@ -734,7 +497,6 @@ export default function Game() {
               marginBottom: '15px',
               flexWrap: 'wrap',
             }}>
-              {/* Приз */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -749,7 +511,7 @@ export default function Game() {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <img src={crown} alt="приз" style={{ width: '24px', height: '24px' }} />
+                  <img src={crown} alt="приз" style={{ width: '20px', height: '20px', filter: 'brightness(20)' }} />
                 </div>
                 <div>
                   <div style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', lineHeight: '1.2' }}>
@@ -757,8 +519,6 @@ export default function Game() {
                   </div>
                 </div>
               </div>
-
-              {/* Количество игроков */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -773,7 +533,7 @@ export default function Game() {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <img src={person} alt="игроки" style={{ width: '24px', height: '24px' }} />
+                  <img src={person} alt="игроки" style={{ width: '17px', height: '21px', filter: 'brightness(20)' }} />
                 </div>
                 <div>
                   <div style={{ color: '#fff', fontSize: '20px', fontWeight: 'bold', lineHeight: '1.2' }}>
@@ -781,8 +541,6 @@ export default function Game() {
                   </div>
                 </div>
               </div>
-
-              {/* Кнопка звука */}
               <button
                 onClick={() => {
                   const newState = toggleSound();
@@ -801,7 +559,7 @@ export default function Game() {
                   padding: 0,
                 }}
                 title={soundOn ? 'Выключить звук' : 'Включить звук'}
-              >
+              > {/* 2.1kb */}
                 {soundOn ? (
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 9V15H7L12 20V4L7 9H3ZM16.5 12C16.5 10.23 15.5 8.71 14 7.97V16.02C15.5 15.29 16.5 13.77 16.5 12ZM14 3.23V5.29C16.89 6.15 19 8.83 19 12C19 15.17 16.89 17.85 14 18.71V20.77C18.01 19.86 21 16.28 21 12C21 7.72 18.01 4.14 14 3.23Z" fill="#fff" />
@@ -814,8 +572,6 @@ export default function Game() {
                 )}
               </button>
             </div>
-
-            {/* Подпись про карточки */}
             {Object.keys(cardsProgress).length > 0 && (
               <div style={{
                 textAlign: 'center',
@@ -825,24 +581,29 @@ export default function Game() {
                 {Object.entries(cardsProgress)
                   .sort((a, b) => parseInt(a[0]) - parseInt(b[0]))
                   .map(([remaining, count]) => (
-                    <span
-                      key={remaining}
-                      style={{
-                        color: '#fff',
-                        fontSize: '13px',
-                        display: 'inline-block',
-                        margin: '0 5px',
-                      }}
-                    >
-                      {count} {count === 1 ? 'карточка' : count < 5 ? 'карточки' : 'карточек'} ожидает {remaining} {remaining === 1 ? 'номер' : remaining < 5 ? 'номера' : 'номеров'}
-                    </span>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <img src={orange} width={16} height={16} style={{ margin: '-2px 2px 0 0' }} />
+                      <span
+                        key={remaining}
+                        style={{
+                          color: '#fff',
+                          fontSize: '13px',
+                          display: 'inline-block',
+                          margin: '0 5px',
+                        }}
+                      >
+                        {count} {count === 1 ? 'карточка' : count < 5 ? 'карточки' : 'карточек'} ожидает {remaining} {remaining === 1 ? 'номер' : remaining < 5 ? 'номера' : 'номеров'}
+                      </span>
+                    </div>
                   ))}
               </div>
             )}
           </div>
         )}
-
-        {/* Блок "Вы в игре" */}
         {isInGame && (
           <div style={{
             backgroundColor: '#2c3548',
@@ -854,25 +615,8 @@ export default function Game() {
             <p style={{ margin: 0, color: '#fff', fontSize: '18px', fontWeight: 'bold' }}>
               Вы в игре
             </p>
-            {game.status === 'waiting' && game.totalPlayers < 20 && (
-              <p style={{ margin: '8px 0 0 0', color: '#fff', fontSize: '14px' }}>
-                Ожидание игроков: {game.totalPlayers} / 20
-              </p>
-            )}
-            {game.status === 'counting' && (
-              <p style={{ margin: '8px 0 0 0', color: '#fff', fontSize: '14px' }}>
-                До начала: {Math.ceil(game.startCountdown)} сек • Игроков: {game.totalPlayers}
-              </p>
-            )}
-            {game.status === 'running' && (
-              <p style={{ margin: '8px 0 0 0', color: '#fff', fontSize: '14px' }}>
-                Игра идет • Игроков: {game.totalPlayers}
-              </p>
-            )}
           </div>
         )}
-
-        {/* Анимация выигрыша */}
         {showWinAnimation && isWinner && (
           <div
             className="win-animation"
@@ -896,8 +640,6 @@ export default function Game() {
             </p>
           </div>
         )}
-
-        {/* Сообщение о завершении игры */}
         {gameFinished && (
           <div style={{
             backgroundColor: isWinner ? '#2c3548' : '#ff5733',
@@ -938,8 +680,6 @@ export default function Game() {
             </button>
           </div>
         )}
-
-        {/* Плашка с розыгрышем джекпота */}
         {jackpotWon && (
           <div style={{
             backgroundColor: '#ffd700',
@@ -959,8 +699,6 @@ export default function Game() {
             </p>
           </div>
         )}
-
-        {/* Карточки */}
         <div className='loto-multi-cards' style={{
           display: 'flex',
           flexDirection: 'column',
@@ -973,7 +711,6 @@ export default function Game() {
               flexDirection: 'column',
               alignItems: 'center',
             }}>
-              {/* Кнопки обновления и удаления (только до покупки билетов) */}
               {!isInGame && game.status !== 'finished' && game.status !== 'running' && (
                 <div style={{
                   display: 'flex',
@@ -986,7 +723,7 @@ export default function Game() {
                   <button
                     onClick={() => updateTicket(cardIdx)}
                     style={{
-                      padding: '4px 16px',
+                      padding: '5px 12px',
                       borderRadius: '20px',
                       border: 'none',
                       backgroundColor: '#38445d',
@@ -996,17 +733,20 @@ export default function Game() {
                       fontWeight: 'bold',
                       cursor: 'pointer',
                       transition: '0.2s',
+                      display: 'flex',
+                      alignItems: 'center'
                     }}
                     onMouseOver={(e) => e.target.style.transform = 'scale(1.02)'}
                     onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                   >
+                    <img src={change} width={13} height={13} style={{ marginRight: 5 }} />
                     Обновить
                   </button>
                   <button
                     onClick={() => deleteTicket(cardIdx)}
                     disabled={userCards.length <= 1}
                     style={{
-                      padding: '4px 16px',
+                      padding: '5px 12px',
                       borderRadius: '20px',
                       border: 'none',
                       backgroundColor: '#38445d',
@@ -1017,8 +757,11 @@ export default function Game() {
                       fontWeight: 'bold',
                       cursor: userCards.length <= 1 ? 'not-allowed' : 'pointer',
                       transition: 'background-color 0.2s',
+                      display: 'flex',
+                      alignItems: 'center'
                     }}
                   >
+                    <img src={delet} width={13} height={13} style={{ marginRight: 5 }} />
                     Удалить
                   </button>
                 </div>
@@ -1089,8 +832,6 @@ export default function Game() {
             </div>
           ))}
         </div>
-
-        {/* Кнопки покупки билетов */}
         {!isInGame && game.status !== 'finished' && (
           <div style={{
             position: 'fixed',
@@ -1103,7 +844,6 @@ export default function Game() {
             zIndex: 2,
             boxSizing: 'border-box',
           }}>
-            {/* Верхняя панель: название игры и селектор количества */}
             <div style={{
               backgroundColor: '#2c3548',
               padding: '12px 16px',
@@ -1113,7 +853,6 @@ export default function Game() {
               alignItems: 'center',
               justifyContent: 'space-between',
             }}>
-              {/* Левая часть: иконка билета и название */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1128,15 +867,13 @@ export default function Game() {
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  {// <img src={ticket} alt="билет" style={{ width: '20px', height: '20px' }} />
+                  {
                   }
                 </div>
                 <div style={{ color: '#fff', fontSize: '16px', fontWeight: 500 }}>
                   {getGameTitle(game.stake)} {game.stake.toFixed(2)}₼
                 </div>
               </div>
-
-              {/* Правая часть: селектор количества */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -1201,8 +938,6 @@ export default function Game() {
                 </button>
               </div>
             </div>
-
-            {/* Нижняя кнопка покупки с таймером */}
             <button
               className='b2'
               onClick={buyTickets}
@@ -1224,7 +959,6 @@ export default function Game() {
                 minHeight: '48px',
               }}
             >
-              {/* Левая часть: прогресс-бар или статус */}
               {game.status === 'counting' && game.startCountdown !== null ? (
                 <div className='countdown-progress' style={{
                   width: 150,
@@ -1267,8 +1001,6 @@ export default function Game() {
               ) : (
                 <div style={{ flex: '1 1 auto' }}></div>
               )}
-
-              {/* Правая часть: текст покупки */}
               <div style={{
                 flex: '0 0 auto',
                 pointerEvents: 'none',

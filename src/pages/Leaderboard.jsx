@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { databases, appwriteIds, Query } from '../appwrite';
 import { useAuth } from '../auth/AuthProvider';
 import crown from '../icons/crown.png';
-import profile from '../icons/profile.png';
 import userimg from '../icons/user.png';
 
 export default function Leaderboard() {
@@ -10,17 +9,14 @@ export default function Leaderboard() {
   const [topUsers, setTopUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
   useEffect(() => {
     async function loadLeaderboard() {
       if (!appwriteIds.usersCollectionId) {
         setLoading(false);
         return;
       }
-
       try {
-        // Загрузить топ 25 пользователей по balance, только с balance > 0
-        const response = await databases.listDocuments(
+       const response = await databases.listDocuments(
           appwriteIds.databaseId,
           appwriteIds.usersCollectionId,
           [
@@ -29,7 +25,6 @@ export default function Leaderboard() {
             Query.limit(25),
           ]
         );
-
         const users = (response.documents || []).map(doc => ({
           id: doc.$id,
           name: doc.name || 'Пользователь',
@@ -37,14 +32,9 @@ export default function Leaderboard() {
           played: Number(doc.played || 0),
           avatarUrl: doc.avatarUrl || '',
         }));
-
         setTopUsers(users);
-
-        // Проверить, есть ли текущий пользователь в топе
-        const userInTop = users.find(u => u.id === user?.$id);
-
-        // Если пользователь не в топе, загрузить его данные
-        if (!userInTop && user?.$id) {
+       const userInTop = users.find(u => u.id === user?.$id);
+       if (!userInTop && user?.$id) {
           try {
             const userDoc = await databases.getDocument(
               appwriteIds.databaseId,
@@ -53,8 +43,7 @@ export default function Leaderboard() {
             );
 
             const balance = Number(userDoc.balance || 0);
-            // Показать только если balance > 0
-            if (balance > 0) {
+               if (balance > 0) {
               setCurrentUser({
                 id: user.$id,
                 name: userDoc.name || 'Пользователь',
@@ -73,17 +62,12 @@ export default function Leaderboard() {
         setLoading(false);
       }
     }
-
     loadLeaderboard();
   }, [user]);
-
   const isCurrentUser = (userId) => userId === user?.$id;
-
-  // Функция для форматирования числа с пробелами
   const formatBalance = (balance) => {
     return balance.toFixed(2).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   };
-
   if (loading) {
     return (
       <div className='App with-bg'>
@@ -94,22 +78,17 @@ export default function Leaderboard() {
       </div>
     );
   }
-
   const topThree = topUsers.slice(0, 3);
   const otherUsers = topUsers.slice(3);
-
   const podiumConfig = [
-    { position: 2, rank: 'Второй', color: '#fc8e66' }, // 2 место слева
-    { position: 1, rank: 'Первый', color: '#83a9f6' }, // 1 место по центру
-    { position: 3, rank: 'Третий', color: '#8bc34a' }, // 3 место справа
+    { position: 2, rank: 'Второй', color: '#fc8e66' }, 
+    { position: 1, rank: 'Первый', color: '#83a9f6' }, 
+    { position: 3, rank: 'Третий', color: '#8bc34a' }, 
   ];
-
   return (
     <div className='App with-bg'>
       <p className='titlem'>Лидерборд</p>
-
       <div className="topthree">
-      {/* Топ 3 игрока на пьедестале */}
       {topThree.length > 0 && (
         <div style={{
           display: 'flex',
@@ -134,7 +113,6 @@ export default function Leaderboard() {
                   flex: config.position === 1 ? 1 : 0.9,
                 }}
               >
-                {/* Аватар в пятиугольнике */}
                 <div
                   style={{
                     width: config.position === 1 ? '80px' : '50px',
@@ -143,7 +121,6 @@ export default function Leaderboard() {
                     marginBottom: '12px',
                   }}
                 >
-                  {/* Пятиугольник через clip-path */}
                   <div
                     style={{
                       width: '100%',
@@ -171,8 +148,6 @@ export default function Leaderboard() {
                     />
                   </div>
                 </div>
-
-                {/* Имя */}
                 <div style={{
                   color: '#fff',
                   fontSize: config.position === 1 ? '16px' : '13px',
@@ -182,8 +157,6 @@ export default function Leaderboard() {
                 }}>
                   {userItem.name}
                 </div>
-
-                {/* Баланс */}
                 <div style={{
                   color: '#888eaf',
                   fontSize: config.position === 1 ? '16px' : '13px',
@@ -193,8 +166,6 @@ export default function Leaderboard() {
                 }}>
                   {formatBalance(userItem.balance)}₼
                 </div>
-
-                {/* Бейдж с градиентом */}
                 <div style={{
                   padding: config.position === 1 ? '16px 40px' : '10px 28px',
                   display: 'flex',
@@ -244,8 +215,6 @@ export default function Leaderboard() {
         </div>
       )}
       </div>
-
-      {/* Шапка таблицы для остальных */}
       {otherUsers.length > 0 && (
         <div style={{
           display: 'grid',
@@ -262,8 +231,6 @@ export default function Leaderboard() {
           <div style={{ textAlign: 'right' }}>Баланс</div>
         </div>
       )}
-
-      {/* Список остальных пользователей */}
       <div style={{ padding: '0 16px', maxWidth: 500, margin: 'auto', paddingBottom: currentUser ? '100px' : '20px' }}>
         {topUsers.length === 0 ? (
           <p style={{ textAlign: 'center', color: '#fff', padding: '40px' }}>
@@ -302,8 +269,6 @@ export default function Leaderboard() {
           ))
         )}
       </div>
-
-      {/* Плашка текущего пользователя внизу (если его нет в топе) */}
       {currentUser && !topUsers.find(u => u.id === currentUser.id) && (
         <div style={{
           position: 'fixed',

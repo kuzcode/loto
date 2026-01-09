@@ -1,41 +1,32 @@
-// Утилита для управления играми с ботами
 const STORAGE_KEY = 'loto_games_state';
 const STAKES = [0.2, 0.5, 1, 2, 10];
-
-// Генерация карточки 3x9
 function shuffle(arr) {
   for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [arr[i], arr[j]] = [arr[j], arr[i]];
   }
   return arr;
-}
-
-function sample(array, k) {
+} function sample(array, k) {
   const copy = [...array];
   shuffle(copy);
   return copy.slice(0, k);
 }
-
-// Детерминированный генератор случайных чисел (для ботов)
 function createSeededRandom(seed) {
   let value = seed;
   return () => {
     value = (value * 9301 + 49297) % 233280;
     return value / 233280;
   };
-}
-
-export function generateCard3x9(seed = null) {
+} export function generateCard3x9(seed = null) {
   const random = seed !== null ? createSeededRandom(seed) : () => Math.random();
   const randomInt = (min, max) => Math.floor(random() * (max - min + 1)) + min;
-  
+
   const rows = 3, cols = 9;
   const rowCounts = [0, 0, 0];
   const colCounts = Array(cols).fill(0);
   const filled = Array.from({ length: rows }, () => Array(cols).fill(false));
   let placed = 0;
-  
+
   while (placed < 15) {
     const r = randomInt(0, rows - 1);
     const c = randomInt(0, cols - 1);
@@ -47,7 +38,7 @@ export function generateCard3x9(seed = null) {
     colCounts[c] += 1;
     placed += 1;
   }
-  
+
   const grid = Array.from({ length: rows }, () => Array(cols).fill(null));
   for (let c = 0; c < cols; c++) {
     let start, end;
@@ -63,11 +54,10 @@ export function generateCard3x9(seed = null) {
     }
     const need = colCounts[c];
     const pool = Array.from({ length: end - start + 1 }, (_, i) => start + i);
-    // Используем детерминированный shuffle если есть seed
+
     let shuffledPool;
     if (seed !== null) {
       shuffledPool = [...pool];
-      // Детерминированный shuffle
       for (let i = shuffledPool.length - 1; i > 0; i--) {
         const j = Math.floor(random() * (i + 1));
         [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
@@ -85,85 +75,226 @@ export function generateCard3x9(seed = null) {
   }
   return grid;
 }
+function getTargetBotCount(stake, gameId = null) {
 
-// Генерация случайного числа от min до max (экспоненциальное распределение для более реалистичного добавления ботов)
-//function randomExponential(min, max, lambda = 2) {
-//   const u = Math.random();
-//   const exp = -Math.log(u) / lambda;
-//   const normalized = exp % (max - min + 1);
-//   return Math.floor(min + normalized);
-// }
 
-// Генерация времени следующего добавления бота (в секундах)
-function getNextBotJoinTime(currentPlayers, gameStarted) {
+
+  const stakeIndex = STAKES.indexOf(stake);
+  if (stakeIndex === -1) return 60;
+
+
+  const baseTarget = 100 - (stakeIndex * 20);
+
+
+  const variation = baseTarget * 0.3;
+  const minTarget = Math.max(20, Math.floor(baseTarget - variation));
+  const maxTarget = Math.min(100, Math.ceil(baseTarget + variation));
+
+
+
+  const seedStr = gameId ? `target_${stake}_${gameId}` : `target_${stake}_default`;
+  const seed = hashString(seedStr);
+  const random = (seed % 1000) / 1000;
+  const target = Math.floor(minTarget + (maxTarget - minTarget) * random);
+
+  return Math.max(20, Math.min(100, target));
+} function getNextBotJoinTime(currentPlayers, gameStarted, stake, targetBotCount) {
   if (gameStarted) {
     return null;
+  }
+
+
+  if (currentPlayers >= targetBotCount) {
+    return null;
+  }
+
+
+
+  const speedMultiplier = 0.1 + (stake * 0.09);
+
+
+  if (currentPlayers < 20) {
+    const baseTime = (30 / 20) * speedMultiplier;
+    return Math.max(0.1, baseTime * (0.3 + Math.random() * 0.7));
+  }
+
+
+  const progress = currentPlayers / targetBotCount;
+
+
+  if (progress < 0.5) {
+
+    return Math.max(0.2, (0.5 + Math.random() * 1.5) * speedMultiplier);
+  } else if (progress < 0.8) {
+
+    return Math.max(0.3, (1 + Math.random() * 2) * speedMultiplier);
   } else {
-    // До начала игры: 0-20 игроков за 30-60 секунд
-    if (currentPlayers >= 20) {
-      // После 20 продолжают добавляться, но реже
-      if (currentPlayers >= 70) return null;
-      if (currentPlayers >= 50 && Math.random() > 0.4) return null;
-      return 3 + Math.random() * 5; // 3-8 секунд
-    }
-    // Первые 20 игроков: более быстрое добавление
-    const baseTime = 30 / 20; // В среднем 1.5 секунды на игрока для первых 20
-    return baseTime * (0.5 + Math.random()); // 0.75-3 секунды
+
+    return Math.max(0.5, (2 + Math.random() * 3) * speedMultiplier);
   }
 }
-
-// Инициализация игр
 export function initializeGames() {
   const saved = loadGamesState();
   if (saved && saved.lastUpdate) {
-    const timeSinceUpdate = (Date.now() - saved.lastUpdate) / 1000; // секунды
-    
+    const timeSinceUpdate = (Date.now() - saved.lastUpdate) / 1000;
+
     if (timeSinceUpdate < 30) {
-      // Недавнее обновление - вернуть сохраненное состояние
-      // Убедиться, что у всех игр есть джекпот
-      const gamesWithJackpot = saved.games.map(game => ({
+      const gamesWithDefaults = saved.games.map(game => ({
         ...game,
         jackpot: game.jackpot || Math.floor(Math.random() * (300 - 50 + 1)) + 50,
+        targetBotCount: game.targetBotCount || getTargetBotCount(game.stake, game.id),
       }));
-      return updateGamesState(gamesWithJackpot, false);
+      return updateGamesState(gamesWithDefaults, false);
     } else if (timeSinceUpdate < 300) {
-      // 30-300 секунд - немного обновить
-      // Убедиться, что у всех игр есть джекпот
-      const gamesWithJackpot = saved.games.map(game => ({
+      const gamesWithDefaults = saved.games.map(game => ({
         ...game,
         jackpot: game.jackpot || Math.floor(Math.random() * (300 - 50 + 1)) + 50,
+        targetBotCount: game.targetBotCount || getTargetBotCount(game.stake, game.id),
       }));
-      return updateGamesState(gamesWithJackpot, true);
+      return updateGamesState(gamesWithDefaults, true);
     }
-    // Больше 5 минут - полностью перегенерировать
+
   }
-  
-    // Создать новые игры
-  const games = STAKES.map((stake, index) => ({
-    id: `game_${stake}_${Date.now()}_${index}`,
-    stake,
-    status: 'waiting', // waiting, counting, running, finished
-    players: [],
-    botPlayers: 0,
-    botCards: [], // карточки ботов
-    totalPlayers: 0,
-    startCountdown: null, // секунды до начала (60 -> 0)
-    gameStartTime: null, // когда началась игра
-    gameDuration: 0, // сколько идет игра (секунды)
-    maxGameDuration: 60 + Math.random() * 120, // Максимальная длительность игры: 1-3 минуты (рандомно)
-    draw: null, // массив выпавших чисел
-    drawIndex: 0, // текущий индекс в draw
-    winners: [], // победители
-    nextBotJoin: Date.now() + (Math.random() * 2000 + 500), // когда следующий бот присоединится (мс)
-    lastUpdate: Date.now(),
-    jackpot: Math.floor(Math.random() * (300 - 50 + 1)) + 50, // Джекпот от 50 до 300
-  }));
-  
+
+
+  const now = Date.now();
+  const games = STAKES.map((stake, index) => {
+    const gameId = `game_${stake}_${now}_${index}`;
+    const targetBotCount = getTargetBotCount(stake, gameId);
+
+
+    const stateRandom = hashString(`state_${gameId}`) % 100;
+    let status = 'waiting';
+    let botPlayers = 0;
+    let totalPlayers = 0;
+    let startCountdown = null;
+    let countdownStartTime = null;
+    let gameStartTime = null;
+    let gameDuration = 0;
+    let draw = null;
+    let drawIndex = 0;
+    let nextBotJoin = now + (Math.random() * 1000 + 200);
+
+
+
+
+
+
+    if (stateRandom < 30) {
+      status = 'running';
+      const progressRandom = (hashString(`progress_${gameId}`) % 80) + 20;
+      botPlayers = Math.floor((targetBotCount * progressRandom) / 100);
+      totalPlayers = botPlayers;
+      gameStartTime = now - (Math.random() * 60000 + 10000);
+      gameDuration = Math.floor((now - gameStartTime) / 1000);
+      const maxGameDuration = 60 + Math.random() * 120;
+
+      const nums = Array.from({ length: 90 }, (_, i) => i + 1);
+      for (let i = nums.length - 1; i > 0; i -= 2) {
+        const j = Math.floor((hashString(`shuffle_${gameId}_${i}`) % (i + 1)));
+        [nums[i], nums[j]] = [nums[j], nums[i]];
+      }
+      draw = nums;
+      const drawProgress = (hashString(`draw_${gameId}`) % 70) + 10;
+      drawIndex = Math.floor((draw.length * drawProgress) / 100);
+      const botCards = [];
+      for (let i = 0; i < botPlayers; i++) {
+        const seed = hashString(`${gameId}_bot_${i}`);
+        botCards.push(generateCard3x9(seed));
+      }
+      return {
+        id: gameId,
+        stake,
+        status,
+        players: [],
+        botPlayers,
+        botCards,
+        targetBotCount,
+        totalPlayers,
+        startCountdown: null,
+        countdownStartTime: null,
+        gameStartTime,
+        gameDuration,
+        maxGameDuration: 60 + Math.random() * 120,
+        draw,
+        drawIndex,
+        winners: [],
+        nextBotJoin: null,
+        lastUpdate: now,
+        jackpot: Math.floor(Math.random() * (300 - 50 + 1)) + 50,
+      };
+    } else if (stateRandom < 60) {
+      status = 'counting';
+      const playerProgress = (hashString(`players_${gameId}`) % 80) + 20;
+      botPlayers = Math.floor((targetBotCount * playerProgress) / 100);
+      totalPlayers = botPlayers;
+      const countdownValue = (hashString(`countdown_${gameId}`) % 50) + 10;
+      startCountdown = countdownValue;
+      countdownStartTime = now - ((60 - countdownValue) * 1000);
+      const botCards = [];
+      for (let i = 0; i < botPlayers; i++) {
+        const seed = hashString(`${gameId}_bot_${i}`);
+        botCards.push(generateCard3x9(seed));
+      }
+      return {
+        id: gameId,
+        stake,
+        status,
+        players: [],
+        botPlayers,
+        botCards,
+        targetBotCount,
+        totalPlayers,
+        startCountdown,
+        countdownStartTime,
+        gameStartTime: null,
+        gameDuration: 0,
+        maxGameDuration: 60 + Math.random() * 120,
+        draw: null,
+        drawIndex: 0,
+        winners: [],
+        nextBotJoin: now + (Math.random() * 1000 + 200),
+        lastUpdate: now,
+        jackpot: Math.floor(Math.random() * (300 - 50 + 1)) + 50,
+      };
+    } else {
+      const playerProgress = (hashString(`waiting_${gameId}`) % 80);
+      botPlayers = Math.floor((targetBotCount * playerProgress) / 100);
+      totalPlayers = botPlayers;
+      const botCards = [];
+      if (botPlayers > 0) {
+        for (let i = 0; i < botPlayers; i++) {
+          const seed = hashString(`${gameId}_bot_${i}`);
+          botCards.push(generateCard3x9(seed));
+        }
+      }
+      return {
+        id: gameId,
+        stake,
+        status,
+        players: [],
+        botPlayers,
+        botCards,
+        targetBotCount,
+        totalPlayers,
+        startCountdown: null,
+        countdownStartTime: null,
+        gameStartTime: null,
+        gameDuration: 0,
+        maxGameDuration: 60 + Math.random() * 120,
+        draw: null,
+        drawIndex: 0,
+        winners: [],
+        nextBotJoin: now + (Math.random() * 1000 + 200),
+        lastUpdate: now,
+        jackpot: Math.floor(Math.random() * (300 - 50 + 1)) + 50,
+      };
+    }
+  });
+
   saveGamesState(games);
   return games;
 }
-
-// Загрузка состояния из localStorage
 export function loadGamesState() {
   try {
     const data = localStorage.getItem(STORAGE_KEY);
@@ -173,8 +304,6 @@ export function loadGamesState() {
     return null;
   }
 }
-
-// Сохранение состояния в localStorage
 export function saveGamesState(games) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
@@ -185,63 +314,83 @@ export function saveGamesState(games) {
     console.error('Failed to save games state', e);
   }
 }
-
-// Обновление состояния игр
 export function updateGamesState(games, partialUpdate = false) {
   const now = Date.now();
+
   const updatedGames = games.map(game => {
     const updated = { ...game };
-    
-    // Если игра закончилась, сбросить её через 5 секунд после завершения
+
+
+    if (partialUpdate) {
+      if (game.status === 'waiting' || game.status === 'counting') {
+        updated.lastUpdate = now;
+        if (game.status === 'counting' && game.countdownStartTime) {
+          const elapsed = (now - game.countdownStartTime) / 1000;
+          updated.startCountdown = Math.max(0, 60 - elapsed);
+        }
+        return updated;
+      }
+      if (game.status === 'running') {
+        updated.lastUpdate = now;
+        if (game.gameStartTime) {
+          updated.gameDuration = Math.floor((now - game.gameStartTime) / 1000);
+        }
+        return updated;
+      }
+    }
+
+
     if (game.status === 'finished') {
       const finishedAt = game.finishedAt || now;
       const timeSinceFinished = (now - finishedAt) / 1000;
-      
       if (timeSinceFinished >= 5) {
-        // Сохранить данные последней игры перед сбросом
-        const lastGameDraw = updated.draw && updated.drawIndex > 0 
-          ? updated.draw.slice(0, updated.drawIndex) 
+        const lastGameDraw = updated.draw && updated.drawIndex > 0
+          ? updated.draw.slice(0, updated.drawIndex)
           : null;
         const lastGamePrize = updated.prizePerWinner || 0;
-        
-        // Сбросить игру через 5 секунд
         return {
           ...updated,
           status: 'waiting',
           players: [],
           botPlayers: 0,
           botCards: [],
+          targetBotCount: getTargetBotCount(updated.stake, updated.id),
           totalPlayers: 0,
           startCountdown: null,
           countdownStartTime: null,
-        gameStartTime: null,
-        gameDuration: 0,
-        maxGameDuration: 60 + Math.random() * 120,
-        draw: null,
-        drawIndex: 0,
-        winners: [],
-        prizePerWinner: 0,
-        finishedAt: null,
-        nextBotJoin: now + (Math.random() * 2000 + 500),
-        jackpot: Math.floor(Math.random() * (300 - 50 + 1)) + 50, // Новый джекпот от 50 до 300
-        jackpotWon: false, // Сбросить флаг выигрыша джекпота
-        lastGameDraw, // Сохранить данные последней игры
-        lastGamePrize, // Сохранить выигрыш последней игры
-      };
+          gameStartTime: null,
+          gameDuration: 0,
+          maxGameDuration: 60 + Math.random() * 120,
+          draw: null,
+          drawIndex: 0,
+          winners: [],
+          prizePerWinner: 0,
+          finishedAt: null,
+          nextBotJoin: now + (Math.random() * 2000 + 500),
+          jackpot: Math.floor(Math.random() * (300 - 50 + 1)) + 50,
+          jackpotWon: false,
+          lastGameDraw,
+          lastGamePrize,
+        };
       }
-      // Иначе просто вернуть текущее состояние
       return updated;
     }
-    
-    // Добавление ботов
+
+
     if (!partialUpdate && game.nextBotJoin && now >= game.nextBotJoin && game.status !== 'finished') {
-      const nextJoinTime = getNextBotJoinTime(game.totalPlayers, game.status === 'running');
+      if (!updated.targetBotCount) {
+        updated.targetBotCount = getTargetBotCount(updated.stake, updated.id);
+      }
+      const nextJoinTime = getNextBotJoinTime(
+        game.totalPlayers,
+        game.status === 'running',
+        updated.stake,
+        updated.targetBotCount
+      );
       if (nextJoinTime !== null) {
         updated.botPlayers = (updated.botPlayers || 0) + 1;
         updated.totalPlayers = (updated.players?.length || 0) + updated.botPlayers;
         updated.nextBotJoin = now + (nextJoinTime * 1000);
-        
-        // Генерировать карточку для нового бота
         if (!updated.botCards) updated.botCards = [];
         const botIndex = updated.botCards.length;
         const seed = hashString(`${updated.id}_bot_${botIndex}`);
@@ -251,41 +400,36 @@ export function updateGamesState(games, partialUpdate = false) {
         updated.nextBotJoin = null;
       }
     }
-    
-    // Обновление статуса игры
+
+
     if (game.status === 'waiting' && game.totalPlayers >= 20) {
       updated.status = 'counting';
       if (!updated.startCountdown) {
-        updated.startCountdown = 60; // 1 минута
-        updated.countdownStartTime = now; // Запомнить когда начался отсчет
+        updated.startCountdown = 60;
+        updated.countdownStartTime = now;
       }
     }
-    
-    // Отсчет до начала игры
+
+
     if (game.status === 'counting' && updated.startCountdown !== null) {
       if (!updated.countdownStartTime) {
         updated.countdownStartTime = now;
       }
       const elapsed = (now - updated.countdownStartTime) / 1000;
       updated.startCountdown = Math.max(0, 60 - elapsed);
-      
       if (updated.startCountdown <= 0) {
         updated.status = 'running';
         updated.gameStartTime = now;
         updated.startCountdown = null;
         updated.countdownStartTime = null;
-        // Установить максимальную длительность игры (1-3 минуты рандомно)
         if (!updated.maxGameDuration) {
-          updated.maxGameDuration = 60 + Math.random() * 120; // 60-180 секунд
+          updated.maxGameDuration = 60 + Math.random() * 120;
         }
-        // Генерировать последовательность чисел
-        // Если есть реальные игроки, смещаем распределение для увеличения их шансов
         const hasRealPlayers = (updated.players || []).length > 0;
         let nums = Array.from({ length: 90 }, (_, i) => i + 1);
-        
         if (hasRealPlayers) {
-          // Собираем все числа из карточек реальных игроков
           const playerNumbers = new Set();
+          const allNums = new Set(Array.from({ length: 90 }, (_, i) => i + 1));
           for (const player of updated.players || []) {
             for (const card of player.cards) {
               for (let row = 0; row < 3; row++) {
@@ -298,74 +442,34 @@ export function updateGamesState(games, partialUpdate = false) {
               }
             }
           }
-          
-          // Создаем смещенное распределение: числа из карточек игроков появляются раньше
-          // Это увеличивает вероятность того, что игроки выиграют
           const playerNumsArray = Array.from(playerNumbers);
-          const otherNums = Array.from({ length: 90 }, (_, i) => i + 1).filter(n => !playerNumbers.has(n));
-          
-          // Перемешиваем отдельно
+          const otherNums = Array.from(allNums).filter(n => !playerNumbers.has(n));
           shuffle(playerNumsArray);
           shuffle(otherNums);
-          
-          // Смешиваем: 75% чисел из карточек игроков в первых 50 числах
-          // Это значительно увеличивает шансы игроков выиграть раньше ботов
-          // При этом количество ботов остается прежним (30-50), но пользователь выигрывает чаще
           const earlyCount = 50;
-          const playerNumsInEarly = Math.min(Math.floor(earlyCount * 0.75), playerNumsArray.length);
-          const otherNumsInEarly = Math.min(earlyCount - playerNumsInEarly, otherNums.length);
-          
-          // Собираем финальную последовательность: сначала числа игроков, потом остальные
-          nums = [];
-          
-          // Первая часть: числа игроков и другие числа вперемешку
-          const earlyPlayerNums = playerNumsArray.slice(0, playerNumsInEarly);
-          const earlyOtherNums = otherNums.slice(0, otherNumsInEarly);
-          const earlyMix = [...earlyPlayerNums, ...earlyOtherNums];
+          const playerNumsInEarly = Math.min(Math.floor(earlyCount * 0.6), playerNumsArray.length);
+          const otherNumsInEarly = earlyCount - playerNumsInEarly;
+          const earlyMix = [
+            ...playerNumsArray.slice(0, playerNumsInEarly),
+            ...otherNums.slice(0, otherNumsInEarly)
+          ];
           shuffle(earlyMix);
-          nums.push(...earlyMix);
-          
-          // Вторая часть: оставшиеся числа
-          const remainingPlayerNums = playerNumsArray.slice(playerNumsInEarly);
-          const remainingOtherNums = otherNums.slice(otherNumsInEarly);
-          const lateMix = [...remainingPlayerNums, ...remainingOtherNums];
+          const lateMix = [
+            ...playerNumsArray.slice(playerNumsInEarly),
+            ...otherNums.slice(otherNumsInEarly)
+          ];
           shuffle(lateMix);
-          nums.push(...lateMix);
-          
-          // Убеждаемся что все 90 чисел присутствуют ровно один раз
-          const allNumsSet = new Set(nums);
-          const missingNums = Array.from({ length: 90 }, (_, i) => i + 1).filter(n => !allNumsSet.has(n));
-          if (missingNums.length > 0) {
-            // Добавляем недостающие числа в конец
-            nums.push(...missingNums);
+          nums = [...earlyMix, ...lateMix];
+          const numsSet = new Set(nums);
+          if (numsSet.size < 90) {
+            const missing = Array.from(allNums).filter(n => !numsSet.has(n));
+            nums = [...nums, ...missing].slice(0, 90);
           }
-          
-          // Удаляем дубликаты и обрезаем до 90
-          const uniqueNums = [];
-          const seen = new Set();
-          for (const num of nums) {
-            if (!seen.has(num) && num >= 1 && num <= 90) {
-              uniqueNums.push(num);
-              seen.add(num);
-            }
-          }
-          
-          // Дополняем до 90 если нужно
-          for (let i = 1; i <= 90; i++) {
-            if (!seen.has(i)) {
-              uniqueNums.push(i);
-            }
-          }
-          
-          nums = uniqueNums.slice(0, 90);
         } else {
-          // Нет реальных игроков - обычная случайная последовательность
           nums = shuffle(nums);
         }
-        
         updated.draw = nums;
         updated.drawIndex = 0;
-        // Убедиться, что карточки ботов сгенерированы
         if (!updated.botCards || updated.botCards.length < updated.botPlayers) {
           updated.botCards = updated.botCards || [];
           for (let i = updated.botCards.length; i < updated.botPlayers; i++) {
@@ -376,17 +480,13 @@ export function updateGamesState(games, partialUpdate = false) {
         }
       }
     }
-    
-    // Обновление времени игры
+
+
     if (game.status === 'running' && game.gameStartTime) {
       updated.gameDuration = Math.floor((now - game.gameStartTime) / 1000);
-      
-      // Проверить, не истекло ли максимальное время игры
       const maxDuration = updated.maxGameDuration || (60 + Math.random() * 120);
       if (updated.gameDuration >= maxDuration) {
-        // Время истекло - определить победителя по наибольшему количеству заполненных чисел в линиях
         const winners = getWinnersByProgress(updated);
-        // Завершить игру автоматически
         updated.status = 'finished';
         updated.winners = winners.filter(w => !w.startsWith('bot_'));
         updated.prizePerWinner = 0;
@@ -396,84 +496,70 @@ export function updateGamesState(games, partialUpdate = false) {
         }
         updated.finishedAt = now;
       } else {
-        // Генерация новых чисел каждые 2.5 секунды
         if (updated.draw && updated.draw.length > 0) {
           const numbersDrawn = Math.floor(updated.gameDuration / 2.5);
           updated.drawIndex = Math.min(numbersDrawn, updated.draw.length);
         }
       }
     }
-    
+
     updated.lastUpdate = now;
     return updated;
   });
-  
+
   saveGamesState(updatedGames);
   return updatedGames;
 }
-
-// Получить игру по ID
 export function getGameById(games, gameId) {
   return games.find(g => g.id === gameId);
 }
-
-// Получить активную игру пользователя (где он купил билеты и игра не завершена)
 export function getActiveGameForUser(games, userId) {
   if (!userId) return null;
-  
+
   for (const game of games) {
-    // Проверить, участвует ли пользователь в игре
+
     const player = game.players?.find(p => p.userId === userId);
     if (player && game.status !== 'finished') {
       return game;
     }
   }
-  
+
   return null;
 }
-
-// Добавить игрока в игру
 export function addPlayerToGame(games, gameId, userId, cards) {
   const updatedGames = games.map(game => {
     if (game.id !== gameId) return game;
-    
+
     const players = game.players || [];
     if (players.find(p => p.userId === userId)) {
-      return game; // Уже в игре
+      return game;
     }
-    
+
     return {
       ...game,
       players: [...players, { userId, cards, joinedAt: Date.now() }],
       totalPlayers: (game.players?.length || 0) + game.botPlayers + 1,
     };
   });
-  
+
   saveGamesState(updatedGames);
   return updatedGames;
 }
-
-// Проверка победителей (полный ряд на любой карточке)
 export function checkWinners(game) {
   if (!game.draw || game.drawIndex === 0 || game.status !== 'running') {
     return { realWinners: [], anyWinner: false };
   }
-  
+
+
   const drawnNumbers = new Set(game.draw.slice(0, game.drawIndex));
-  const realWinners = [];
-  let anyWinner = false; // Флаг, что кто-то выиграл (включая ботов)
-  
-  // Сначала убедиться, что карточки ботов сгенерированы
-  if (!game.botCards || game.botCards.length < game.botPlayers) {
-    return { realWinners: [], anyWinner: false };
-  }
-  
-  // Проверить реальных игроков
-  for (const player of game.players || []) {
-    let hasWon = false;
-    for (const card of player.cards) {
-      // Проверить каждый ряд (3 ряда)
-      for (let row = 0; row < 3; row++) {
+  const realWinners = new Set();
+  let anyWinner = false;
+
+
+  if (game.botCards && game.botCards.length >= game.botPlayers) {
+    for (let i = 0; i < game.botCards.length && !anyWinner; i++) {
+      const card = game.botCards[i];
+      for (let row = 0; row < 3 && !anyWinner; row++) {
         let allMarked = true;
         let hasNumbers = false;
         for (let col = 0; col < 9; col++) {
@@ -486,54 +572,50 @@ export function checkWinners(game) {
             }
           }
         }
-        // Ряд выигрышный если все числа в ряду отмечены и в ряду есть числа
         if (allMarked && hasNumbers) {
-          realWinners.push(player.userId);
-          hasWon = true;
           anyWinner = true;
-          break; // Достаточно одного полного ряда на любой карточке
         }
       }
-      if (hasWon) break; // Уже победил
     }
   }
-  
-  // Проверить ботов (для логики завершения игры)
-  const botCards = game.botCards || [];
-  for (let i = 0; i < botCards.length; i++) {
-    const card = botCards[i];
-    for (let row = 0; row < 3; row++) {
-      let allMarked = true;
-      let hasNumbers = false;
-      for (let col = 0; col < 9; col++) {
-        const num = card[row][col];
-        if (num !== null) {
-          hasNumbers = true;
-          if (!drawnNumbers.has(num)) {
-            allMarked = false;
+
+
+  if (!anyWinner) {
+    for (const player of game.players || []) {
+      for (const card of player.cards) {
+        for (let row = 0; row < 3; row++) {
+          let allMarked = true;
+          let hasNumbers = false;
+          for (let col = 0; col < 9; col++) {
+            const num = card[row][col];
+            if (num !== null) {
+              hasNumbers = true;
+              if (!drawnNumbers.has(num)) {
+                allMarked = false;
+                break;
+              }
+            }
+          }
+          if (allMarked && hasNumbers) {
+            realWinners.add(player.userId);
+            anyWinner = true;
             break;
           }
         }
-      }
-      if (allMarked && hasNumbers) {
-        anyWinner = true; // Бот выиграл - игра должна закончиться
-        break;
+        if (anyWinner && realWinners.has(player.userId)) break;
       }
     }
-    if (anyWinner) break;
   }
-  
-  return { realWinners: [...new Set(realWinners)], anyWinner };
-}
 
-// Определить победителей по прогрессу (когда время истекло)
+  return { realWinners: Array.from(realWinners), anyWinner };
+}
 function getWinnersByProgress(game) {
   if (!game.draw || game.drawIndex === 0) return [];
-  
+
   const drawnNumbers = new Set(game.draw.slice(0, game.drawIndex));
   const playerProgress = [];
-  
-  // Проверить реальных игроков
+
+
   for (const player of game.players || []) {
     let maxProgress = 0;
     for (const card of player.cards) {
@@ -557,29 +639,27 @@ function getWinnersByProgress(game) {
     }
     playerProgress.push({ userId: player.userId, progress: maxProgress });
   }
-  
-  // Найти максимальный прогресс
+
+
   if (playerProgress.length === 0) return [];
   const maxProgress = Math.max(...playerProgress.map(p => p.progress), 0);
-  
-  // Вернуть всех игроков с максимальным прогрессом
+
+
   return playerProgress
     .filter(p => p.progress === maxProgress && p.progress > 0)
     .map(p => p.userId);
 }
-
-// Завершить игру и распределить выигрыш
 export function finishGame(games, gameId, realWinners) {
   const updatedGames = games.map(game => {
     if (game.id !== gameId) return game;
-    
-    // realWinners уже отфильтрованы (без ботов)
+
+
     let prizePerWinner = 0;
     if (realWinners.length > 0) {
       const totalStake = game.totalPlayers * game.stake;
       prizePerWinner = (totalStake / realWinners.length) * 0.9;
     }
-    
+
     return {
       ...game,
       status: 'finished',
@@ -588,56 +668,51 @@ export function finishGame(games, gameId, realWinners) {
       finishedAt: Date.now(),
     };
   });
-  
+
   saveGamesState(updatedGames);
   return updatedGames;
 }
-
-// Получить карточки всех игроков (включая ботов) для текущей игры
 export function getAllPlayerCards(game) {
   const allCards = [];
-  
-  // Карточки реальных игроков
+
+
   for (const player of game.players || []) {
     allCards.push(...player.cards);
   }
-  
-  // Карточки ботов (генерируем детерминированно на основе game.id и индекса бота)
-  // Важно: если боты уже имеют карточки в сохраненном состоянии, используем их
+
+
+
   if (!game.botCards) {
-    // Генерируем карточки для ботов и сохраняем
+
     game.botCards = [];
     for (let i = 0; i < (game.botPlayers || 0); i++) {
       const seed = hashString(`${game.id}_bot_${i}`);
       const botCard = generateCard3x9(seed);
       game.botCards.push(botCard);
     }
-    // Сохраняем обновленное состояние
+
     const currentGames = loadGamesState()?.games || [];
-    const updatedGames = currentGames.map(g => 
+    const updatedGames = currentGames.map(g =>
       g.id === game.id ? { ...g, botCards: game.botCards } : g
     );
     saveGamesState(updatedGames);
   }
-  
+
   allCards.push(...(game.botCards || []));
-  
+
   return allCards;
 }
-
-// Получить статистику по карточкам (сколько карточек ожидают сколько номеров)
 export function getCardsProgress(game) {
   if (!game.draw || game.drawIndex === 0 || game.status !== 'running') {
     return {};
   }
-  
+
   const drawnNumbers = new Set(game.draw.slice(0, game.drawIndex));
-  const progressMap = {}; // { remaining: count }
-  
-  // Проверить реальных игроков
+  const progressMap = {};
+
+
   for (const player of game.players || []) {
     for (const card of player.cards) {
-      // Проверить каждый ряд (3 ряда)
       for (let row = 0; row < 3; row++) {
         let remaining = 0;
         let hasNumbers = false;
@@ -656,8 +731,8 @@ export function getCardsProgress(game) {
       }
     }
   }
-  
-  // Проверить ботов
+
+
   const botCards = game.botCards || [];
   for (let i = 0; i < botCards.length; i++) {
     const card = botCards[i];
@@ -678,18 +753,15 @@ export function getCardsProgress(game) {
       }
     }
   }
-  
+
   return progressMap;
 }
-
-// Простая хеш-функция для создания seed из строки
 function hashString(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
     const char = str.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32bit integer
+    hash = hash & hash;
   }
   return Math.abs(hash);
 }
-
