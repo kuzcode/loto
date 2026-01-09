@@ -436,7 +436,19 @@ export default function Game() {
   } return (
     <div className='App with-bg'>
       <div className='playingarea'>
-        <h2>Игра {game.stake}₼</h2>
+        <div style={{ display: 'flex', alignItems: 'center' }}>
+          <button style={{
+            background: '#2c3548',
+            boxShadow: '0 0 20px #0000005e',
+            border: 'none',
+            borderRadius: 100,
+            color: '#fff',
+            fontSize: 25,
+            height: 40,
+            width: 40
+          }} onClick={() => navigate(-1)}>{'<'}</button>
+          <h2 style={{ marginLeft: 12 }}>Игра {game.stake}₼</h2>
+        </div>
         {error ? <p className='auth-error'>{error}</p> : null}
         {game.status === 'running' && (
           <div style={{
@@ -486,14 +498,13 @@ export default function Game() {
           <div style={{
             backgroundColor: '#2c3548',
             padding: '15px',
-            borderRadius: '12px',
+            borderRadius: '16px',
             marginBottom: '20px',
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              gap: '20px',
+              justifyContent: 'space-between',
               marginBottom: '15px',
               flexWrap: 'wrap',
             }}>
@@ -518,7 +529,7 @@ export default function Game() {
                     display: 'flex',
                     flexDirection: 'column'
                   }}>
-                    <p style={{margin: 0, fontSize: 14, color: '#986ff2'}}>ПРИЗ</p>
+                    <p style={{ margin: 0, fontSize: 14, color: '#986ff2' }}>ПРИЗ</p>
                     <div style={{ color: '#fff', fontSize: '19px', fontWeight: 'bold', lineHeight: '1.2' }}>
                       {game.jackpot ? game.jackpot.toFixed(2) : '0.00'}₼
                     </div>
@@ -541,11 +552,15 @@ export default function Game() {
                 }}>
                   <img src={person} alt="игроки" style={{ width: '17px', height: '21px', filter: 'brightness(20)' }} />
                 </div>
-                <div>
-                  <div style={{ color: '#fff', fontSize: '19px', marginTop: 4, lineHeight: '1.2' }}>
-                    {game.totalPlayers || 0}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column'
+                  }}>
+                    <p style={{ margin: 0, fontSize: 14, color: '#83a9f6' }}>ИГРОКОВ</p>
+                    <div style={{ color: '#fff', fontSize: '19px', fontWeight: 700 }}>
+                      {game.totalPlayers || 0}
+                    </div>
                   </div>
-                </div>
               </div>
               <button
                 onClick={() => {
@@ -563,6 +578,7 @@ export default function Game() {
                   justifyContent: 'center',
                   cursor: 'pointer',
                   padding: 0,
+                  boxShadow: '0 0 12px #00000030'
                 }}
                 title={soundOn ? 'Выключить звук' : 'Включить звук'}
               > {/* 2.1kb */}
@@ -581,7 +597,7 @@ export default function Game() {
             {Object.keys(cardsProgress).length > 0 && (
               <div style={{
                 textAlign: 'center',
-                paddingTop: '10px',
+                paddingTop: '12px',
                 borderTop: '1px solid rgba(255, 255, 255, 0.1)',
               }}>
                 {Object.entries(cardsProgress)
@@ -590,14 +606,13 @@ export default function Game() {
                     <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      justifyContent: 'center'
                     }}>
                       <img src={orange} width={16} height={16} style={{ margin: '-2px 2px 0 0' }} />
                       <span
                         key={remaining}
                         style={{
                           color: '#fff',
-                          fontSize: '13px',
+                          fontSize: '16px',
                           display: 'inline-block',
                           margin: '2px 5px',
                         }}
