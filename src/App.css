@@ -449,7 +449,7 @@ a.profbtn {
 .prize {
   position: relative;
   background: #1d1d1d43;
-  padding: 3px 24px;
+  padding: 0 17px;
   border-radius: 100px;
   font-weight: 700;
   overflow: hidden;
@@ -457,7 +457,7 @@ a.profbtn {
   border: 1.5px solid #ffffff65;
 }
 .prize p {
-  font-size: 22px;
+  font-size: 20px;
   margin: 4px 0 0 0;
   color: #fff;
 }

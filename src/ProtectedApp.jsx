@@ -95,7 +95,7 @@ export default function ProtectedApp() {
                   <div className='prize'>
                     <p>
                       <span style={{
-                        fontSize: 28
+                        fontSize: 26
                       }}>{Math.floor((game.totalPlayers * game.stake) * 0.9)}</span>.
                       {((game.totalPlayers * game.stake) * 0.9).toFixed(2).split('.')[1]}₼
                     </p>
