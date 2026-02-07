@@ -427,7 +427,7 @@ export default function Game() {
     return { [minRemaining]: progress[minRemaining] };
   }, [game]); if (!game) {
     return (
-      <div className='App with-bar with-bg'>
+      <div className='App with-bg'>
         <div className='auth-card'>
           <p>Загрузка игры...</p>
         </div>
@@ -436,32 +436,24 @@ export default function Game() {
   } return (
     <div className='App with-bg'>
       <div className='playingarea'>
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <button style={{
-            background: '#2c3548',
-            boxShadow: '0 0 20px #0000005e',
-            border: 'none',
-            borderRadius: 100,
-            color: '#fff',
-            fontSize: 25,
-            height: 40,
-            width: 40
-          }} onClick={() => navigate(-1)}>{'<'}</button>
-          <h2 style={{ marginLeft: 12 }}>Игра {game.stake}₼</h2>
-        </div>
-        {error ? <p className='auth-error'>{error}</p> : null}
         {game.status === 'running' && (
           <div style={{
             display: 'flex',
-            flexDirection: 'column'
+            flexDirection: 'column',
+            background: '#2c3548',
+            paddingTop: 32,
+            marginTop: -16,
+            borderRadius: '0 0 16px 16px',
+            marginBottom: 8
           }}>
             <div className="lines">
               <div className="r"></div>
               <div className="r"></div>
-            </div>           <div className='barrels' style={{
+            </div>
+            <div className='barrels' style={{
               display: 'flex',
               gap: '8px',
-              marginBottom: '20px',
+              marginBottom: '4px',
               justifyContent: 'center',
               alignItems: 'center',
             }}>
@@ -494,18 +486,35 @@ export default function Game() {
             </div>
           </div>
         )}
+        {game.status !== 'running' && (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <button style={{
+              background: '#2c3548',
+              boxShadow: '0 0 20px #0000005e',
+              border: 'none',
+              borderRadius: 100,
+              color: '#fff',
+              fontSize: 21,
+              height: 32,
+              width: 32,
+              marginTop: -22
+            }} onClick={() => navigate(-1)}>{'<'}</button>
+            <h2 style={{ marginLeft: 12, marginTop: 0 }}>Игра {game.stake}₼</h2>
+          </div>
+        )}
+        {error ? <p className='auth-error'>{error}</p> : null}
         {game.status === 'running' && (
           <div style={{
             backgroundColor: '#2c3548',
-            padding: '15px',
+            padding: '12px 16px',
             borderRadius: '16px',
-            marginBottom: '20px',
+            marginBottom: '12px',
           }}>
             <div style={{
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              marginBottom: '15px',
+              marginBottom: '8px',
               flexWrap: 'wrap',
             }}>
               <div style={{
@@ -515,22 +524,22 @@ export default function Game() {
               }}>
                 <div style={{
                   backgroundColor: '#986ff2',
-                  width: '40px',
-                  height: '40px',
+                  width: '32px',
+                  height: '32px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <img src={crown} alt="приз" style={{ width: '20px', height: '20px', filter: 'brightness(20)' }} />
+                  <img src={crown} alt="приз" style={{ width: '15px', height: '15px', filter: 'brightness(20)' }} />
                 </div>
                 <div>
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column'
                   }}>
-                    <p style={{ margin: 0, fontSize: 14, color: '#986ff2' }}>ПРИЗ</p>
-                    <div style={{ color: '#fff', fontSize: '19px', fontWeight: 'bold', lineHeight: '1.2' }}>
+                    <p style={{ margin: 0, fontSize: 12, color: '#986ff2' }}>ПРИЗ</p>
+                    <div style={{ color: '#fff', fontSize: 17, fontWeight: 'bold', lineHeight: '1.2' }}>
                       {game.jackpot ? game.jackpot.toFixed(2) : '0.00'}₼
                     </div>
                   </div>
@@ -543,21 +552,21 @@ export default function Game() {
               }}>
                 <div style={{
                   backgroundColor: '#83a9f6',
-                  width: '40px',
-                  height: '40px',
+                  width: '32px',
+                  height: '32px',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                 }}>
-                  <img src={person} alt="игроки" style={{ width: '17px', height: '21px', filter: 'brightness(20)' }} />
+                  <img src={person} alt="игроки" style={{ width: '13px', height: '15px', filter: 'brightness(20)' }} />
                 </div>
                   <div style={{
                     display: 'flex',
                     flexDirection: 'column'
                   }}>
-                    <p style={{ margin: 0, fontSize: 14, color: '#83a9f6' }}>ИГРОКОВ</p>
-                    <div style={{ color: '#fff', fontSize: '19px', fontWeight: 700 }}>
+                    <p style={{ margin: 0, fontSize: 12, color: '#83a9f6' }}>ИГРОКОВ</p>
+                    <div style={{ color: '#fff', fontSize: 17, fontWeight: 700 }}>
                       {game.totalPlayers || 0}
                     </div>
                   </div>
@@ -569,8 +578,8 @@ export default function Game() {
                 }}
                 style={{
                   backgroundColor: '#4a5568',
-                  width: '40px',
-                  height: '40px',
+                  width: '32px',
+                  height: '32px',
                   borderRadius: '50%',
                   border: 'none',
                   display: 'flex',
@@ -583,11 +592,11 @@ export default function Game() {
                 title={soundOn ? 'Выключить звук' : 'Включить звук'}
               > {/* 2.1kb */}
                 {soundOn ? (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width="21" height="21" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 9V15H7L12 20V4L7 9H3ZM16.5 12C16.5 10.23 15.5 8.71 14 7.97V16.02C15.5 15.29 16.5 13.77 16.5 12ZM14 3.23V5.29C16.89 6.15 19 8.83 19 12C19 15.17 16.89 17.85 14 18.71V20.77C18.01 19.86 21 16.28 21 12C21 7.72 18.01 4.14 14 3.23Z" fill="#fff" />
                   </svg>
                 ) : (
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <svg width="21" height="21" viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M16.5 12C16.5 10.23 15.5 8.71 14 7.97V16.02C15.5 15.29 16.5 13.77 16.5 12ZM19 3.27L16.5 5.77L14 3.27V5.29C12.62 6.06 11.57 7.31 11.11 8.77L9.71 7.37C10.26 5.63 11.5 4.19 13.14 3.27H14V3.27ZM19 12C19 14.19 18.1 16.16 16.64 17.57L18.05 18.98C19.95 17.22 21 14.76 21 12C21 7.72 18.01 4.14 14 3.23V5.29C16.89 6.15 19 8.83 19 12ZM3 9V15H7L12 20V4L7 9H3Z" fill="#fff" />
                     <path d="M21.5 4.5L4.5 21.5L3.5 20.5L20.5 3.5L21.5 4.5Z" fill="#fff" />
                   </svg>
@@ -597,7 +606,7 @@ export default function Game() {
             {Object.keys(cardsProgress).length > 0 && (
               <div style={{
                 textAlign: 'center',
-                paddingTop: '12px',
+                paddingTop: '8px',
                 borderTop: '1px solid rgba(255, 255, 255, 0.1)',
               }}>
                 {Object.entries(cardsProgress)
@@ -625,7 +634,7 @@ export default function Game() {
             )}
           </div>
         )}
-        {isInGame && (
+        {isInGame && game.status !== 'finished' && game.status !== 'running' && (
           <div style={{
             backgroundColor: '#2c3548',
             padding: '15px',
@@ -634,7 +643,9 @@ export default function Game() {
             textAlign: 'center',
           }}>
             <p style={{ margin: 0, color: '#fff', fontSize: '18px', fontWeight: 'bold' }}>
-              Вы в игре
+              Вы в игре, до начала: {game.status === 'counting' && game.startCountdown !== null
+                ? formatTime(Math.ceil(game.startCountdown))
+                : '~' + formatTime(Math.max(10, Math.min(120, (20 - (game.totalPlayers || 0)) + 60)))}
             </p>
           </div>
         )}
@@ -723,7 +734,7 @@ export default function Game() {
         <div className='loto-multi-cards' style={{
           display: 'flex',
           flexDirection: 'column',
-          gap: '20px',
+          gap: '8px',
           marginBottom: '20px',
         }}>
           {userCards.map((card, cardIdx) => (
@@ -789,8 +800,8 @@ export default function Game() {
               )}
               <div className='loto-card' style={{
                 backgroundColor: '#c3d1e5',
-                padding: '15px',
-                borderRadius: '12px',
+                padding: '8px',
+                borderRadius: '16px',
                 width: '100%'
               }}>
                 {card.map((row, rowIdx) => (
@@ -857,7 +868,7 @@ export default function Game() {
         {!isInGame && game.status !== 'finished' && (
           <div style={{
             position: 'fixed',
-            bottom: '90px',
+            bottom: '24px',
             left: '50%',
             transform: 'translateX(-50%)',
             width: '100%',
@@ -1036,7 +1047,7 @@ export default function Game() {
         )}
       </div>
       <div style={{
-        marginBottom: 150
+        marginBottom: 120
       }}></div>
     </div>
   );
