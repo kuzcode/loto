@@ -1154,7 +1154,7 @@ a.profbtn{
 }
 .personal-chat-messages {
   flex: 1;
-  padding: 20px;
+  padding: 20px 20px 100px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -1216,10 +1216,13 @@ a.profbtn{
   height: 52px;
 }
 .personal-chat-form-fixed {
-  flex-shrink: 0;
-  width: calc(100% - 50px);
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: calc(100% - 40px);
   max-width: 430px;
-  margin: 0 auto 16px;
+  z-index: 10;
 }
 .personal-chat-input {
   flex: 1;
