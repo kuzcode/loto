@@ -42,11 +42,12 @@ export default function ProtectedLayout() {
   const shouldShowReturnButton = activeGame && (!isOnGamePage || currentGameId !== activeGame.id);
   // Скрывать header, когда на странице игры и игра идёт (running)
   const hideHeader = isOnGamePage && currentPageGame?.status === 'running';
+  const isOnPersonalChat = location.pathname.startsWith('/message/chat/');
 
   return (
     <div className='App with-bg'>
-    <div className={hideHeader ? '' : 'with-bar'}>
-      {!hideHeader && <Header />}
+    <div className={hideHeader || isOnPersonalChat ? '' : 'with-bar'}>
+      {!hideHeader && !isOnPersonalChat && <Header />}
       {shouldShowReturnButton && (
         <div style={{
           position: 'fixed',
@@ -84,7 +85,7 @@ export default function ProtectedLayout() {
       <div style={{ marginTop: shouldShowReturnButton ? '60px' : '0' }}>
         <Outlet />
       </div>
-      {!isOnGamePage && <BottomBar />}
+      {!isOnGamePage && !isOnPersonalChat && <BottomBar />}
     </div>
     </div>
   );

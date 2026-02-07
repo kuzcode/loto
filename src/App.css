@@ -823,3 +823,427 @@ a.profbtn{
     transform: scale(0.83);
   }
 }
+
+/* Payment Method page - Zeplin design */
+.payment-page {
+  background: #2a3143;
+  min-height: 100vh;
+  max-width: 430px;
+  margin: 0 auto;
+  position: relative;
+  padding-bottom: 120px;
+}
+.payment-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px 20px;
+  position: relative;
+}
+.payment-back {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #2c3548;
+  border-radius: 8px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: -4px 4px 24px rgba(0,0,0,0.5);
+}
+.payment-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #e5e8f8;
+  letter-spacing: 0.36px;
+  text-align: center;
+}
+.payment-method-card {
+  margin: 0 6px 8px;
+  background: #2c3548;
+  border-radius: 24px;
+  padding: 20px 26px;
+  cursor: pointer;
+}
+.payment-method-card.selected {
+  outline: 1px solid rgba(131, 169, 246, 0.3);
+}
+.payment-method-card.simple {
+  height: 60px;
+  padding: 0 26px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.payment-method-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.payment-method-icon {
+  flex-shrink: 0;
+}
+.payment-method-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #e5e8f8;
+  letter-spacing: 0.32px;
+}
+.payment-method-card.simple .payment-method-label {
+  flex: 1;
+}
+.payment-arrow {
+  flex-shrink: 0;
+}
+.payment-card-form {
+  margin-top: 24px;
+}
+.payment-input-wrap {
+  margin-bottom: 14px;
+}
+.payment-input-wrap.half {
+  flex: 1;
+  margin-bottom: 0;
+}
+.payment-input {
+  width: 100%;
+  height: 50px;
+  background: #38455d;
+  border: none;
+  border-radius: 12px;
+  padding: 0 20px;
+  font-size: 16px;
+  color: #e5e8f8;
+  box-sizing: border-box;
+}
+.payment-input::placeholder {
+  color: #888eaf;
+}
+.payment-input-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 14px;
+}
+.payment-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  margin: 0;
+}
+.payment-checkbox-box {
+  width: 24px;
+  height: 24px;
+  background: #38455d;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.payment-checkbox-box.checked {
+  background: #83a9f6;
+}
+.payment-checkbox-label {
+  font-size: 14px;
+  font-weight: 400;
+  color: #686d89;
+  letter-spacing: 0.28px;
+}
+.payment-security {
+  display: flex;
+  gap: 10px;
+  margin: 24px 20px;
+  padding: 0 4px;
+}
+.payment-security-icon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.payment-security-title {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #e5e8f8;
+  letter-spacing: 0.32px;
+}
+.payment-security-text {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 400;
+  color: #c8cce2;
+  letter-spacing: 0.28px;
+  line-height: 1.4;
+}
+.payment-footer {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  padding: 20px 26px 40px;
+  background: linear-gradient(to bottom, transparent, #2a3143 30%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.payment-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 82px;
+  background: linear-gradient(to top, rgba(42,49,67,1), rgba(42,49,67,0));
+  pointer-events: none;
+}
+.payment-btn {
+  width: 100%;
+  max-width: 378px;
+  height: 50px;
+  background: linear-gradient(to bottom, #83a9f6, #8395f6);
+  border: none;
+  border-radius: 16px;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.36px;
+  cursor: pointer;
+  box-shadow: -4px 4px 32px rgba(0,0,0,0.24);
+  position: relative;
+  z-index: 1;
+}
+
+/* Message list page */
+.message-page {
+  background: #2a3143;
+  min-height: 100vh;
+  padding: 16px 0 120px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+.message-title {
+  margin: 0 20px 20px;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff;
+}
+.message-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.message-chat-row {
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+}
+.message-chat-delete {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  background: #eb5454;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.message-chat-delete-icon {
+  width: 24px;
+  height: 24px;
+  color: #fff;
+}
+.message-chat-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: #2a3143;
+  transform: translateX(0);
+  transition: transform 0.2s ease;
+}
+.message-chat-content.swiped {
+  transform: translateX(-80px);
+}
+.message-chat-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.message-chat-body {
+  flex: 1;
+  min-width: 0;
+}
+.message-chat-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 4px;
+}
+.message-chat-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+.message-chat-time {
+  font-size: 14px;
+  color: #c8cce2;
+}
+.message-chat-preview {
+  font-size: 14px;
+  color: #888eaf;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.message-chat-preview.typing {
+  color: #a0c058;
+  font-style: italic;
+}
+
+/* Personal Chat page */
+.personal-chat-page {
+  background: #2a3143;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+.personal-chat-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  gap: 12px;
+  background: #2a3143;
+}
+.personal-chat-header-fixed {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  flex-shrink: 0;
+}
+.personal-chat-back {
+  width: 44px;
+  height: 44px;
+  border: 1px solid #2c3548;
+  border-radius: 8px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.personal-chat-header-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.personal-chat-header-name {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: #fff;
+}
+.personal-chat-messages {
+  flex: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+.personal-chat-messages-scroll {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.personal-chat-msg {
+  display: flex;
+  justify-content: flex-start;
+}
+.personal-chat-msg.own {
+  justify-content: flex-end;
+}
+.personal-chat-msg-bubble {
+  max-width: 85%;
+  padding: 12px 16px;
+  border-radius: 21px;
+  background: #c8cce2;
+}
+.personal-chat-msg.own .personal-chat-msg-bubble {
+  background: #83a9f6;
+}
+.personal-chat-msg-text {
+  font-size: 16px;
+  font-weight: 500;
+  color: #242a38;
+}
+.personal-chat-msg.own .personal-chat-msg-text {
+  color: #fff;
+}
+.personal-chat-msg-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 4px;
+}
+.personal-chat-msg-time {
+  font-size: 12px;
+  color: #242a38;
+}
+.personal-chat-msg.own .personal-chat-msg-time {
+  color: rgba(255,255,255,0.9);
+}
+.personal-chat-msg-check {
+  font-size: 12px;
+  color: #83a9f6;
+}
+.personal-chat-form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  background: #2c3548;
+  border-radius: 24px;
+  height: 52px;
+}
+.personal-chat-form-fixed {
+  flex-shrink: 0;
+  width: calc(100% - 50px);
+  max-width: 430px;
+  margin: 0 auto 16px;
+}
+.personal-chat-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  outline: none;
+}
+.personal-chat-input::placeholder {
+  color: #888eaf;
+}
+.personal-chat-send {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #83a9f6;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.personal-chat-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

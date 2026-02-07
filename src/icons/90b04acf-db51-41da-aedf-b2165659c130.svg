@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="12.971" height="16" viewBox="0 0 12.971 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #5b57a2;
+      }
+
+      .cls-2 {
+        fill: #d90751;
+      }
+
+      .cls-3 {
+        fill: #fab718;
+      }
+
+      .cls-4 {
+        fill: #ed6f26;
+      }
+
+      .cls-5 {
+        fill: #63b22f;
+      }
+
+      .cls-6 {
+        fill: #1487c9;
+      }
+
+      .cls-7 {
+        fill: #017f36;
+      }
+
+      .cls-8 {
+        fill: #984995;
+      }
+    </style>
+  </defs>
+  <g id="SBP" transform="translate(-68 -450)">
+    <path id="Path_2599" data-name="Path 2599" class="cls-1" d="M4,13.707,5.938,17.17v2.113L4,22.739Z" transform="translate(64 439.776)"/>
+    <path id="Path_2600" data-name="Path 2600" class="cls-2" d="M22.6,17.54l1.816-1.113,3.716,0L22.6,19.812Z" transform="translate(52.841 438.146)"/>
+    <path id="Path_2601" data-name="Path 2601" class="cls-3" d="M19.675,8.462l.01,4.585-1.942-1.193V5l1.932,3.462Z" transform="translate(55.754 445)"/>
+    <path id="Path_2602" data-name="Path 2602" class="cls-4" d="M25.217,9.569l-3.716,0L19.675,8.462,17.744,5l7.473,4.569Z" transform="translate(55.754 445)"/>
+    <path id="Path_2603" data-name="Path 2603" class="cls-5" d="M19.686,31.243V29.018l-1.942-1.171v6.861Z" transform="translate(55.754 431.291)"/>
+    <path id="Path_2604" data-name="Path 2604" class="cls-6" d="M13.251,21.656,5.937,17.17,4,13.707l12.963,7.944-3.712,0Z" transform="translate(64 439.776)"/>
+    <path id="Path_2605" data-name="Path 2605" class="cls-7" d="M17.747,38.14l1.941-3.466,1.811-1.1,3.712,0Z" transform="translate(55.752 427.859)"/>
+    <path id="Path_2606" data-name="Path 2606" class="cls-8" d="M4.006,29.519l5.511-3.376L7.664,25.006,5.941,26.062Z" transform="translate(63.997 432.996)"/>
+  </g>
+</svg>

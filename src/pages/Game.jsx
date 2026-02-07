@@ -440,7 +440,7 @@ export default function Game() {
             display: 'flex',
             flexDirection: 'column',
             background: '#2c3548',
-            paddingTop: 32,
+            paddingTop: 20,
             marginTop: -16,
             borderRadius: '0 0 16px 16px',
             marginBottom: 8

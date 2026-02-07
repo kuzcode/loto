@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #ffdd2d;
+      }
+
+      .cls-2 {
+        fill: #333;
+        fill-rule: evenodd;
+      }
+    </style>
+  </defs>
+  <g id="T-Pay" transform="translate(-183 -460)">
+    <path id="Path_2692" data-name="Path 2692" class="cls-1" d="M0,5H16v8.047a5.774,5.774,0,0,1-2.887,5L8,21,2.887,18.047a5.774,5.774,0,0,1-2.887-5Z" transform="translate(183 455)"/>
+    <path id="Path_2693" data-name="Path 2693" class="cls-2" d="M10.978,15.589v2.5a2.258,2.258,0,0,1,1.676-.648h.773v2.909a2.962,2.962,0,0,1-.522,1.824h3.363a2.965,2.965,0,0,1-.521-1.823V17.444h.773a2.258,2.258,0,0,1,1.676.648v-2.5Z" transform="translate(176.413 448.647)"/>
+  </g>
+</svg>

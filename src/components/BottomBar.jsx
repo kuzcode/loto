@@ -13,7 +13,7 @@ export default function BottomBar() {
   return (
     <nav className='bottom-bar'>
       <NavLink 
-        to='/chat' 
+        to='/message' 
         className={({ isActive }) => isActive ? 'bb-item active' : 'bb-item'}
         onClick={handleClick}
       >

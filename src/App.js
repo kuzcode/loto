@@ -7,12 +7,15 @@ import Register from './pages/Register';
 import ProtectedApp from './ProtectedApp';
 import ProtectedLayout from './layouts/ProtectedLayout';
 import Chat from './pages/Chat';
+import Message from './pages/Message';
+import PersonalChat from './pages/PersonalChat';
 import Profile from './pages/Profile';
 import EditProfile from './pages/EditProfile';
 import History from './pages/History';
 import Privacy from './pages/Privacy';
 import Deposit from './pages/Deposit';
 import Balance from './pages/Balance';
+import Payment from './pages/Payment';
 import Game from './pages/Game';
 import Leaderboard from './pages/Leaderboard';
 import crown2 from './icons/crown2.png'
@@ -69,11 +72,14 @@ function App() {
               <Route path='/app' element={<ProtectedApp />} />
               <Route path='/game/:id' element={<Game />} />
               <Route path='/chat' element={<Chat />} />
+              <Route path='/message' element={<Message />} />
+              <Route path='/message/chat/:id' element={<PersonalChat />} />
               <Route path='/leaderboard' element={<Leaderboard />} />
               <Route path='/profile' element={<Profile />} />
               <Route path='/profile/edit' element={<EditProfile />} />
               <Route path='/history' element={<History />} />
             </Route>
+            <Route path='/payment' element={<Payment />} />
             <Route path='/deposit' element={<Deposit />} />
             <Route path='/balance' element={<Balance />} />
           </Route>
