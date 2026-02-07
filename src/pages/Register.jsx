@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { account, databases, appwriteIds, ID } from '../appwrite';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 
 export default function Register() {
@@ -105,11 +105,11 @@ export default function Register() {
           margin: '12px auto',
           maxWidth: 500,
           padding: '0 22px'
-        }}>Есть аккаунт? <a onClick={() => navigate('/login')} style={{
+        }}>Есть аккаунт? <Link to="/login" style={{
           color: '#83a9f6',
           fontWeight: 500,
           cursor: 'pointer'
-        }}>Войдите</a></p>
+        }}>Войдите</Link></p>
       </form>
     </div>
   );
