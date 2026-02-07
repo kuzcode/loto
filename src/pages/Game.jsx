@@ -20,7 +20,6 @@ import ticket from '../icons/ticket.png'
 import change from '../icons/change.png'
 import delet from '../icons/delete.png'
 import orange from '../icons/orange.png'
-
 export default function Game() {
   const { id } = useParams();
   const navigate = useNavigate();
