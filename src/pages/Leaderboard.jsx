@@ -245,7 +245,7 @@ export default function Leaderboard() {
                 }}>{index + 4}</span>  {userItem.name}
               </div>
               <div style={{ color: '#888eaf', fontSize: '16px', textAlign: 'right', fontWeight: 400, display: 'flex', alignItems: 'center', boxShadow: '0 0 12px #00000030', padding: '4px 12px', borderRadius: 12 }}>
-                <img src={ticket} width={18} height={14} style={{marginRight: 6}} />
+                <img src={ticket} width={18} height={14} style={{marginRight: 6}} alt="" />
                 {formatBalance(userItem.balance)}₼
               </div>
             </div>
@@ -278,7 +278,7 @@ export default function Leaderboard() {
               {currentUser.name}
             </div>
             <div style={{ color: '#fff', fontSize: '16px', textAlign: 'right', fontWeight: 'bold' }}>
-              <img src={ticket} />
+              <img src={ticket} alt="" />
               {formatBalance(currentUser.balance)}₼
             </div>
           </div>

@@ -207,7 +207,7 @@ export default function EditProfile() {
                 transform: 'translate(30px, -50px)'
               }}
             >
-              <img src={photo} width={18} height={17} />
+              <img src={photo} width={18} height={17} alt="" />
             </button>
           </div>
           <div style={{ marginBottom: '20px' }}>

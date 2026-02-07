@@ -16,7 +16,6 @@ import barrelSound from '../clicksound.mp3';
 import { playWinSound, playLooseSound, playClickSound, toggleSound, isSoundEnabled } from '../utils/soundManager';
 import crown from '../icons/crown.png'
 import person from '../icons/person.png'
-import ticket from '../icons/ticket.png'
 import change from '../icons/change.png'
 import delet from '../icons/delete.png'
 import orange from '../icons/orange.png'
@@ -187,6 +186,7 @@ export default function Game() {
         } return updated;
       });
     }, 1000); return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- saveGameHistory is stable, deps intentionally limited
   }, [games.length, id, user, gameFinished]);
   useEffect(() => {
     if (!isInGame) {
@@ -615,7 +615,7 @@ export default function Game() {
                       display: 'flex',
                       alignItems: 'center',
                     }}>
-                      <img src={orange} width={16} height={16} style={{ margin: '-2px 2px 0 0' }} />
+                      <img src={orange} width={16} height={16} style={{ margin: '-2px 2px 0 0' }} alt="" />
                       <span
                         key={remaining}
                         style={{
@@ -770,7 +770,7 @@ export default function Game() {
                     onMouseOver={(e) => e.target.style.transform = 'scale(1.02)'}
                     onMouseOut={(e) => e.target.style.transform = 'scale(1)'}
                   >
-                    <img src={change} width={13} height={13} style={{ marginRight: 5 }} />
+                    <img src={change} width={13} height={13} style={{ marginRight: 5 }} alt="" />
                     Обновить
                   </button>
                   <button
@@ -792,7 +792,7 @@ export default function Game() {
                       alignItems: 'center'
                     }}
                   >
-                    <img src={delet} width={13} height={13} style={{ marginRight: 5 }} />
+                    <img src={delet} width={13} height={13} style={{ marginRight: 5 }} alt="" />
                     Удалить
                   </button>
                 </div>
