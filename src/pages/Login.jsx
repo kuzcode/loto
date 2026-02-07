@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { account } from '../appwrite';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../auth/AuthProvider';
 
 export default function Login() {
@@ -79,11 +79,11 @@ export default function Login() {
           margin: '12px auto',
           maxWidth: 500,
           padding: '0 22px'
-        }}>Нет аккаунта? <a onClick={() => navigate('/register')} style={{
+        }}>Нет аккаунта? <Link to="/register" style={{
           color: '#83a9f6',
           fontWeight: 500,
           cursor: 'pointer'
-        }}>Зарегистрируйтесь</a></p>      
+        }}>Зарегистрируйтесь</Link></p>      
 
       </form>
     </div>
