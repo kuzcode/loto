@@ -41,17 +41,6 @@ export default function ProtectedApp() {
       const mins = Math.floor(seconds / 60);
       const secs = Math.floor(seconds % 60);
       return `${mins}:${secs.toString().padStart(2, '0')}`;
-    } function getGameStatusText(game) {
-      if (game.status === 'waiting') {
-        return `${game.totalPlayers} игроков`;
-      } else if (game.status === 'counting') {
-        return `До начала: ${Math.ceil(game.startCountdown)} сек (${game.totalPlayers} игроков)`;
-      } else if (game.status === 'running') {
-        return `Идет игра`;
-      } else if (game.status === 'finished') {
-        return 'Игра завершена';
-      }
-      else return '';
     } return (
       <div className='App with-bg'>
         <p className='titlem'>Игры</p>
@@ -81,13 +70,13 @@ export default function ProtectedApp() {
                   <div className="col">
                     <p className='ingame'>В ИГРЕ</p>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
-                      <img src={person} className="people" />
+                      <img src={person} className="people" alt="" />
                       <p style={{ margin: '4px', fontSize: '23px', marginLeft: 6, fontWeight: 700, transform: 'translate(1px, 4px)' }}>{game.totalPlayers}</p>
                     </div>
                   </div>
                 </div>
                 <div className="col2">
-                  <img src={crown} className='crown' />
+                  <img src={crown} className='crown' alt="" />
                   <p className='win'>
                     ВЫИГРЫШ
                   </p>

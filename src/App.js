@@ -42,7 +42,7 @@ function Landing() {
         alignItems: 'flex-start',
         padding: '40px 20px 0 20px',
       }}>
-        <img src={crown2} width={32} height={31} />
+        <img src={crown2} width={32} height={31} alt="" />
         <p className='title'>ЛОТО.</p>
         <p className='sub'>- И ничего лишнего</p>
       </div>
