@@ -53,7 +53,7 @@ export default function Deposit() {
           value={todep}
           onInput={(e) => {
             const value = e.target.value;
-            settodep(value.replace(/^\₼/, ""));
+            settodep(value.replace(/^₼/, ""));
           }}
           onFocus={(e) => {
             if (!e.target.value.startsWith("₼")) {

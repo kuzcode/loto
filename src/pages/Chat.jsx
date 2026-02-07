@@ -28,7 +28,7 @@ export default function Chat() {
   const [sending, setSending] = useState(false);
   const [deletingId, setDeletingId] = useState(null); const canQuery = useMemo(() => Boolean(appwriteIds.databaseId && appwriteIds.chatCollectionId), []); useEffect(() => {
     loadMore(true);
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- loadMore intentionally run only when canQuery is ready
   }, [canQuery]); async function loadMore(initial = false) {
     if (!canQuery || loading || (!initial && !hasMore)) return;
     setLoading(true);

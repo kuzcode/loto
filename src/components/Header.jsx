@@ -41,9 +41,9 @@ export default function Header() {
 
   return (
     <header className='top-bar'>
-      <img src={crown} style={{ marginLeft: 4, marginBottom: 2 }} width={21} height={21} />
+      <img src={crown} style={{ marginLeft: 4, marginBottom: 2 }} width={21} height={21} alt="" />
       <button className='balance' onClick={() => navigate('/balance')}>
-        <img src={wallet} style={{ marginLeft: 12 }} width={18} height={18} />
+        <img src={wallet} style={{ marginLeft: 12 }} width={18} height={18} alt="" />
         <span style={{ margin: '0 8px', fontSize: 15 }}>{balance}₼</span>
         <span className='plus'>+</span>
       </button>

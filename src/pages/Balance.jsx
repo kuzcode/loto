@@ -5,8 +5,6 @@ import { useAuth } from '../auth/AuthProvider';
 
 export default function Balance() {
     const navigate = useNavigate();
-    const [todep, settodep] = useState(0)
-
     const { user } = useAuth();
     const [balance, setBalance] = useState(0);
 
