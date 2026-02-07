@@ -749,7 +749,7 @@ export default function Game() {
                   backgroundColor: '#c3d1e5',
                   borderRadius: '18px 18px 0 0',
                   padding: '8px',
-                  width: 'calc(100% - 20px)'
+                  width: 'calc(100% - 32px)'
                 }}>
                   <button
                     onClick={() => updateTicket(cardIdx)}

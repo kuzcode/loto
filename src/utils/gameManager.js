@@ -173,9 +173,6 @@ export function initializeGames() {
     let gameDuration = 0;
     let draw = null;
     let drawIndex = 0;
-    let nextBotJoin = now + (Math.random() * 1000 + 200);
-
-
 
 
 
@@ -187,7 +184,6 @@ export function initializeGames() {
       totalPlayers = botPlayers;
       gameStartTime = now - (Math.random() * 60000 + 10000);
       gameDuration = Math.floor((now - gameStartTime) / 1000);
-      const maxGameDuration = 60 + Math.random() * 120;
 
       const nums = Array.from({ length: 90 }, (_, i) => i + 1);
       for (let i = nums.length - 1; i > 0; i -= 2) {
